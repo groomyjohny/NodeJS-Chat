@@ -6,13 +6,14 @@ if (!window.WebSocket) {
 var socket = new WebSocket("ws://localhost:8081");
 
 // отправить сообщение из формы publish
-document.forms.publish.onsubmit = function () {
+document.forms.publish.onsubmit = function (event) {
+    event.preventDefault();
     var outgoingMessage = this.message.value;
     let data = { nick: this.nick.value, message: outgoingMessage };
     let msg = JSON.stringify(data);
+    document.getElementById("message").value = '';
 
     socket.send(msg);
-    return false;
 };
 
 // обработчик входящих сообщений
@@ -24,6 +25,17 @@ socket.onmessage = function (event) {
 // показать сообщение в div#subscribe
 function showMessage(message) {
     let data = JSON.parse(message);
-    let code = '<div class="message"><div class="message-nick">' + data.nick + '</div><div class="message-text">' + data.message + '</div></div>'
-    document.getElementById('subscribe').innerHTML += code;
+
+    let messageDiv = document.createElement("div");    
+    let messageNickDiv = document.createElement("div");    
+    let messageTextDiv = document.createElement("div");
+    messageDiv.className = "message";
+    messageNickDiv.className = "message-nick";
+    messageTextDiv.className = "message-text";
+
+    messageNickDiv.innerHTML = data.nick;
+    messageTextDiv.innerHTML = data.message;
+    messageDiv.appendChild(messageNickDiv);
+    messageDiv.appendChild(messageTextDiv);
+    document.getElementById('subscribe').innerHTML = messageDiv.outerHTML + document.getElementById('subscribe').innerHTML; //prepend adds to the end for some reason, so using a workaround.
 }
