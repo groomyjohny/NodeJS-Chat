@@ -1,5 +1,7 @@
-if (localStorage.savedNick) document.getElementById("nick-area").value = localStorage.savedNick;
-else localStorage.setItem('savedNick','');
+if (localStorage.savedNick) 
+    document.getElementById("nick-area").value = localStorage.savedNick;
+else
+    localStorage.setItem('savedNick','');
 
 if (!window.WebSocket) {
     document.body.innerHTML = 'WebSocket в этом браузере не поддерживается.';
