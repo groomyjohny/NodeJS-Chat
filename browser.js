@@ -1,3 +1,6 @@
+if (localStorage.savedNick) document.getElementById("nick-area").value = localStorage.savedNick;
+else localStorage.setItem('savedNick','');
+
 if (!window.WebSocket) {
     document.body.innerHTML = 'WebSocket в этом браузере не поддерживается.';
 }
@@ -37,6 +40,7 @@ function showMessage(message)
     messageTextDiv.className = "message-text";
 
     messageNickDiv.innerHTML = data.nick;
+    localStorage.setItem('savedNick',data.nick);
     messageTextDiv.innerHTML = data.message;
     messageDiv.appendChild(messageNickDiv);
     messageDiv.appendChild(messageTextDiv);
