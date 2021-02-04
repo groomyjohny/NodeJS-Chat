@@ -67,7 +67,7 @@ webSocketServer.on('connection', (ws) => {
         else if (arr.type == "load-more-messages")
         {
             let newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";
-            sqlConnection.query(newQuery, [arr.currentMinId - limit + 1, arr.currentMinId], (err, result, fields) => {
+            sqlConnection.query(newQuery, [arr.currentMinId - limit, arr.currentMinId-1], (err, result, fields) => {
                 if (err) 
                     return console.error(err);
                 else
