@@ -35,7 +35,7 @@ webSocketServer.on('connection', (ws) => {
 
     clients[id] = ws;
     console.log(`Hовое соединение: ${id}`);
-    sqlConnection.query("SELECT nick, message FROM messages", (err, result, fields) => {
+    sqlConnection.query("SELECT id, datetime, nick, message FROM messages", (err, result, fields) => {
         if (err) 
             return console.err(err);
         else

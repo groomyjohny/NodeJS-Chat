@@ -14,6 +14,7 @@ var socket = new WebSocket(sockPath)
 
 // отправить сообщение из формы publish
 document.forms.publish.onsubmit = function (event) {
+    localStorage.setItem('savedNick',data.nick);
     event.preventDefault();
     var outgoingMessage = this.message.value;
     let data = { nick: this.nick.value, message: outgoingMessage };
@@ -37,14 +38,21 @@ function showMessage(message)
     let messageDiv = document.createElement("div");    
     let messageNickDiv = document.createElement("div");    
     let messageTextDiv = document.createElement("div");
+    let messageIdDiv = document.createElement("div");
+    let messageDateTimeDiv = document.createElement("div");
     messageDiv.className = "message";
     messageNickDiv.className = "message-nick";
     messageTextDiv.className = "message-text";
+    messageIdDiv.className = "message-id";
+    messageDateTimeDiv.className = "message-datetime";
 
-    messageNickDiv.innerHTML = data.nick;
-    localStorage.setItem('savedNick',data.nick);
+    messageIdDiv.innerHTML = data.id;
+    messageDateTimeDiv.innerHTML = data.datetime;
+    messageNickDiv.innerHTML = data.nick;    
     messageTextDiv.innerHTML = data.message;
+    messageDiv.appendChild(messageIdDiv);
+    messageDiv.appendChild(messageDateTimeDiv);
     messageDiv.appendChild(messageNickDiv);
-    messageDiv.appendChild(messageTextDiv);
+    messageDiv.appendChild(messageTextDiv);    
     document.getElementById('subscribe').innerHTML = messageDiv.outerHTML + document.getElementById('subscribe').innerHTML; //prepend adds to the end for some reason, so using a workaround.
 }
