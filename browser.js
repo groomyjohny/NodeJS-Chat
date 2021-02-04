@@ -13,16 +13,16 @@ console.log(sockPath)
 var socket = new WebSocket(sockPath)
 
 // отправить сообщение из формы publish
-document.forms.publish.onsubmit = function (event) {
-    localStorage.setItem('savedNick',data.nick);
-    event.preventDefault();
+document.forms.publish.addEventListener("submit", function (event) {
+    event.preventDefault();    
     var outgoingMessage = this.message.value;
     let data = { nick: this.nick.value, message: outgoingMessage };
+    localStorage.setItem('savedNick',data.nick);
     let msg = JSON.stringify(data);
     document.getElementById("message-area").value = '';
 
     socket.send(msg);
-};
+});
 
 // обработчик входящих сообщений
 socket.onmessage = function (event) {
