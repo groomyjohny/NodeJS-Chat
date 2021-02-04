@@ -25,7 +25,8 @@ socket.onmessage = function (event) {
 };
 
 // показать сообщение в div#subscribe
-function showMessage(message) {
+function showMessage(message) 
+{
     let data = JSON.parse(message);
 
     let messageDiv = document.createElement("div");    

@@ -22,6 +22,7 @@ function sendToAll(message)
         clients[key].send(message);
     }
 }
+
 webSocketServer.on('connection', function (ws) {
 
     var id = Math.random();
