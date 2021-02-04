@@ -2,6 +2,7 @@
     "name": "modulesapp",
     "version": "1.0.0",
     "dependencies": {
+        "mysql2": "^2.2.5",
         "node-static": "^0.7.11",
         "ws": "^7.4.2"
     }
