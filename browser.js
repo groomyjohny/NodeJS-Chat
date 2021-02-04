@@ -34,7 +34,7 @@ socket.onmessage = function (event) {
     if (data.type == 'chat-message') showMessage(data);
     else if (data.type =='old-messages') 
     {
-        console.error("This function is not yet implemented");
+        showMessage(data,false);
     }
 };
 
@@ -49,7 +49,7 @@ function isAnyPartOfElementInViewport(el) {
     return (vertInView && horInView);
 }
 // показать сообщение в div#subscribe
-function showMessage(data) 
+function showMessage(data, appendToFront = true) 
 {
     //let data = JSON.parse(message);
     let messageDiv = document.createElement("div");    
@@ -76,8 +76,10 @@ function showMessage(data)
     messageTextDiv.innerHTML = data.message;
     
     messageDiv.appendChild(messageNickDiv);
-    messageDiv.appendChild(messageTextDiv);    
-    document.getElementById('subscribe').innerHTML = messageDiv.outerHTML + document.getElementById('subscribe').innerHTML; //prepend adds to the end for some reason, so using a workaround.
+    messageDiv.appendChild(messageTextDiv);  
+    let parent = document.getElementById('subscribe');  
+    if (appendToFront) parent.innerHTML = messageDiv.outerHTML + document.getElementById('subscribe').innerHTML; //prepend adds to the end for some reason, so using a workaround.
+    else parent.appendChild(messageDiv);
 }
 
 //Обработчик "бесконечного" скроллинга

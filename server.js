@@ -66,8 +66,8 @@ webSocketServer.on('connection', (ws) => {
         }
         else if (arr.type == "load-more-messages")
         {
-            let newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id < ?";
-            sqlConnection.query(newQuery, [limit], (err, result, fields) => {
+            let newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";
+            sqlConnection.query(newQuery, [arr.currentMinId - limit + 1, arr.currentMinId], (err, result, fields) => {
                 if (err) 
                     return console.error(err);
                 else
@@ -75,7 +75,7 @@ webSocketServer.on('connection', (ws) => {
                     for (i in result)
                     {
                         let data = result[i];
-                        data.type = 'chat-message';
+                        data.type = 'old-messages';
                         ws.send(JSON.stringify(data));
                     }
                 }
