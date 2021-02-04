@@ -33,10 +33,18 @@ webSocketServer.on('connection', (ws) => {
     let id = Math.random();
 
     clients[id] = ws;
-    console.log(`Hовое соединение: ${id}`);
-    sqlConnection.query("SELECT id, datetime, nick, message FROM messages", (err, result, fields) => {
+    console.log(`Hовое соединение: id = ${id}`);
+
+    const limit = 30;
+    const subquery = `SELECT AUTO_INCREMENT
+    FROM  INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'chat'
+    AND   TABLE_NAME   = 'messages'`;
+    const query = "SELECT id, datetime, nick, message FROM messages WHERE id > " + "( "+subquery+")-?" ;
+
+    sqlConnection.query(query, [limit], (err, result, fields) => {
         if (err) 
-            return console.err(err);
+            return console.log(err);
         else
             for (i in result)
                 sendToAll(JSON.stringify(result[i]));
