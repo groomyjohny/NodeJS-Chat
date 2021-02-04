@@ -24,13 +24,15 @@ document.forms.publish.addEventListener("submit", function (event) {
     socket.send(msg);
 });
 
-let minMsgId = 999999999;
+let minMsgId = undefined;
 // обработчик входящих сообщений
 socket.onmessage = function (event) {
     var incomingMessage = event.data;
     let data = JSON.parse(incomingMessage);
 
-    minMsgId = Math.min(data.id,minMsgId);
+    if (!minMsgId) minMsgId = data.id;
+    else minMsgId = Math.min(data.id,minMsgId);
+
     if (data.type == 'chat-message') showMessage(data);
     else if (data.type =='old-messages') 
     {
@@ -51,7 +53,6 @@ function isAnyPartOfElementInViewport(el) {
 // показать сообщение в div#subscribe
 function showMessage(data, appendToFront = true) 
 {
-    //let data = JSON.parse(message);
     let messageDiv = document.createElement("div");    
     let messageNickDiv = document.createElement("div");    
     let messageTextDiv = document.createElement("div");
