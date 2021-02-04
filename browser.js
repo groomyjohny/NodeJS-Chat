@@ -34,24 +34,29 @@ socket.onmessage = function (event) {
 function showMessage(message) 
 {
     let data = JSON.parse(message);
-
     let messageDiv = document.createElement("div");    
     let messageNickDiv = document.createElement("div");    
     let messageTextDiv = document.createElement("div");
-    let messageIdDiv = document.createElement("div");
-    let messageDateTimeDiv = document.createElement("div");
+    if (data.id && data.datetime)
+    {
+        let messageIdDiv = document.createElement("div");
+        let messageDateTimeDiv = document.createElement("div");
+
+        messageIdDiv.className = "message-id";
+        messageDateTimeDiv.className = "message-datetime";
+        messageIdDiv.innerHTML = data.id;
+        messageDateTimeDiv.innerHTML = data.datetime;
+
+        messageDiv.appendChild(messageIdDiv);
+        messageDiv.appendChild(messageDateTimeDiv);
+    }
+    
     messageDiv.className = "message";
     messageNickDiv.className = "message-nick";
-    messageTextDiv.className = "message-text";
-    messageIdDiv.className = "message-id";
-    messageDateTimeDiv.className = "message-datetime";
-
-    messageIdDiv.innerHTML = data.id;
-    messageDateTimeDiv.innerHTML = data.datetime;
+    messageTextDiv.className = "message-text";    
     messageNickDiv.innerHTML = data.nick;    
     messageTextDiv.innerHTML = data.message;
-    messageDiv.appendChild(messageIdDiv);
-    messageDiv.appendChild(messageDateTimeDiv);
+    
     messageDiv.appendChild(messageNickDiv);
     messageDiv.appendChild(messageTextDiv);    
     document.getElementById('subscribe').innerHTML = messageDiv.outerHTML + document.getElementById('subscribe').innerHTML; //prepend adds to the end for some reason, so using a workaround.
