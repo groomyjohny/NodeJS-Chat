@@ -3,7 +3,9 @@ if (!window.WebSocket) {
 }
 
 // создать подключение
-var socket = new WebSocket("ws://localhost:8081");
+let sockPath = "ws://"+location.hostname+":8081/";
+console.log(sockPath)
+var socket = new WebSocket(sockPath)
 
 // отправить сообщение из формы publish
 document.forms.publish.onsubmit = function (event) {
@@ -11,7 +13,7 @@ document.forms.publish.onsubmit = function (event) {
     var outgoingMessage = this.message.value;
     let data = { nick: this.nick.value, message: outgoingMessage };
     let msg = JSON.stringify(data);
-    document.getElementById("message").value = '';
+    //document.getElementById("message").value = '';
 
     socket.send(msg);
 };
