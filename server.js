@@ -1,63 +1,71 @@
-var http = require('http');
-var Static = require('node-static');
-var WebSocketServer = new require('ws');
-var mysql = require('mysql2');
+const WebSocketServer = new require('ws');
+const Static = require('node-static');
 const { Socket } = require('dgram');
+const mysql = require('mysql2');
+const http = require('http');
+
+const ports = [8080, 8081];
 
 // подключенные клиенты
-var clients = {};
+let clients = {};
+
+const dbname = `localhost`;
+const dbuser = `root`;
+const dbdatabase = `chat`;
+const dbpassword = ``;
 
 const sqlConnection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "chat",
+    host: dbname,
+    user: dbuser,
+    database: dbdatabase,
     password: ""
 }); 
 
 // WebSocket-сервер на порту 8081
-var webSocketServer = new WebSocketServer.Server({ port: 8081 });
-function sendToAll(message)
-{
-    for (var key in clients) {
+const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
+const sendToAll = (message) => {
+    for (let key in clients) 
         clients[key].send(message);
     }
-}
-webSocketServer.on('connection', function (ws) {
 
-    var id = Math.random();
+webSocketServer.on('connection', (ws) => {
+
+    let id = Math.random();
+
     clients[id] = ws;
-    console.log("новое соединение " + id);
+
+    console.log(`Hовое соединение: ${id}`);
 
     sqlConnection.query("SELECT nick, message FROM messages", (err, result, fields) => {
-        if (!err)
-        {
+        if (err) 
+            return console.err(err);
+        else
             for (i in result)
-            {
                 sendToAll(JSON.stringify(result[i]));
-            }
-        }
     });
 
-    ws.on('message', function (message) {
-        console.log('получено сообщение ' + message);
-        let arr = JSON.parse(message);
+    ws.on('message', (message) => {
+        console.log(`Получено сообщение: ${message}`);
+
+        const arr = JSON.parse(message);
+
         const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-        sqlConnection.query(query, [arr.nick, arr.message])
 
-        sendToAll(message)
+        sqlConnection.query(query, [arr.nick, arr.message]);
+
+        sendToAll(message);
     });
 
-    ws.on('close', function () {
-        console.log('соединение закрыто ' + id);
+    ws.on('close', () => {
+        console.log(`Cоединение закрыто: ${id}`);
         delete clients[id];
     });
 });
 
 
 // обычный сервер (статика) на порту 8080
-var fileServer = new Static.Server('.');
-http.createServer(function (req, res) {
-    fileServer.serve(req, res);
-}).listen(8080);
+const fileServer = new Static.Server('.');
 
-console.log("Сервер запущен на портах 8080, 8081");
+http.createServer( (req, res) => { fileServer.serve(req, res); }).listen(ports[0]);
+
+console.log(`Сервер запущен на портах ${ports[0]}, ${ports[1]}`);
