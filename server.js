@@ -34,9 +34,7 @@ webSocketServer.on('connection', (ws) => {
     let id = Math.random();
 
     clients[id] = ws;
-
     console.log(`Hовое соединение: ${id}`);
-
     sqlConnection.query("SELECT nick, message FROM messages", (err, result, fields) => {
         if (err) 
             return console.err(err);
@@ -47,13 +45,9 @@ webSocketServer.on('connection', (ws) => {
 
     ws.on('message', (message) => {
         console.log(`Получено сообщение: ${message}`);
-
         const arr = JSON.parse(message);
-
         const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-
         sqlConnection.query(query, [arr.nick, arr.message]);
-
         sendToAll(message);
     });
 
@@ -67,6 +61,8 @@ webSocketServer.on('connection', (ws) => {
 // обычный сервер (статика) на порту 8080
 const fileServer = new Static.Server('.');
 
-http.createServer( (req, res) => { fileServer.serve(req, res); }).listen(ports[0]);
+http.createServer( (req, res) => { 
+    fileServer.serve(req, res); 
+}).listen(ports[0]);
 
 console.log(`Сервер запущен на портах ${ports[0]}, ${ports[1]}`);
