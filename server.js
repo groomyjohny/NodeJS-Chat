@@ -44,7 +44,7 @@ webSocketServer.on('connection', (ws) => {
 
     sqlConnection.query(query, [limit], (err, result, fields) => {
         if (err) 
-            return console.log(err);
+            return console.error(err);
         else
             for (i in result)
                 sendToAll(JSON.stringify(result[i]));
@@ -53,9 +53,17 @@ webSocketServer.on('connection', (ws) => {
     ws.on('message', (message) => {
         console.log(`Получено сообщение: ${message}`);
         const arr = JSON.parse(message);
-        const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-        sqlConnection.query(query, [arr.nick, arr.message]);
-        sendToAll(message);
+
+        if (arr.type == 'chat-message')
+        {
+            const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
+            sqlConnection.query(query, [arr.nick, arr.message]);
+            sendToAll(message);
+        }
+        else if (arr.type == "load-more-messages")
+        {
+            console.error("This function is not yet implemented");
+        }
     });
 
     ws.on('close', () => {

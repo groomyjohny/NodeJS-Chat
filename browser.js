@@ -16,7 +16,7 @@ var socket = new WebSocket(sockPath)
 document.forms.publish.addEventListener("submit", function (event) {
     event.preventDefault();    
     var outgoingMessage = this.message.value;
-    let data = { nick: this.nick.value, message: outgoingMessage };
+    let data = { type: 'chat-message', nick: this.nick.value, message: outgoingMessage };
     localStorage.setItem('savedNick',data.nick);
     let msg = JSON.stringify(data);
     document.getElementById("message-area").value = '';
@@ -27,11 +27,17 @@ document.forms.publish.addEventListener("submit", function (event) {
 // обработчик входящих сообщений
 socket.onmessage = function (event) {
     var incomingMessage = event.data;
-    showMessage(incomingMessage);
+    let data = JSON.parse(incomingMessage);
+
+    if (data.type == 'chat-message') showMessage(data);
+    else if (data.type =='old-messages') 
+    {
+        console.error("This function is not yet implemented");
+    }
 };
 
 // показать сообщение в div#subscribe
-function showMessage(message) 
+function showMessage(data) 
 {
     let data = JSON.parse(message);
     let messageDiv = document.createElement("div");    
