@@ -30,7 +30,6 @@ function sendToAll(message)
 }
 
 webSocketServer.on('connection', (ws) => {
-
     let id = Math.random();
 
     clients[id] = ws;
@@ -56,7 +55,6 @@ webSocketServer.on('connection', (ws) => {
         delete clients[id];
     });
 });
-
 
 // обычный сервер (статика) на порту 8080
 const fileServer = new Static.Server('.');
