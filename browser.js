@@ -23,7 +23,7 @@ socket.onmessage = function(event) {
 
 // показать сообщение в div#subscribe
 function showMessage(message) {
-  var messageElem = document.createElement('div');
-  messageElem.appendChild(document.createTextNode(message));
-  document.getElementById('subscribe').appendChild(messageElem);
+  let data = JSON.parse(message);
+  let code = '<div class="message"><div class="nick">' + data.nick + '</div><div class="message-text">'+data.message + '</div></div>'
+  document.getElementById('subscribe').innerHTML += code;
 }
