@@ -47,7 +47,11 @@ webSocketServer.on('connection', (ws) => {
             return console.error(err);
         else
             for (i in result)
-                sendToAll(JSON.stringify(result[i]));
+            {
+                let data = result[i];
+                data.type = 'chat-message';
+                sendToAll(JSON.stringify(data));
+            }
     });
 
     ws.on('message', (message) => {
@@ -62,7 +66,20 @@ webSocketServer.on('connection', (ws) => {
         }
         else if (arr.type == "load-more-messages")
         {
-            console.error("This function is not yet implemented");
+            let newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id < ?";
+            sqlConnection.query(newQuery, [limit], (err, result, fields) => {
+                if (err) 
+                    return console.error(err);
+                else
+                {
+                    for (i in result)
+                    {
+                        let data = result[i];
+                        data.type = 'chat-message';
+                        ws.send(JSON.stringify(data));
+                    }
+                }
+            });
         }
     });
 

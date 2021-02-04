@@ -24,11 +24,13 @@ document.forms.publish.addEventListener("submit", function (event) {
     socket.send(msg);
 });
 
+let minMsgId = 999999999;
 // обработчик входящих сообщений
 socket.onmessage = function (event) {
     var incomingMessage = event.data;
     let data = JSON.parse(incomingMessage);
 
+    minMsgId = Math.min(data.id,minMsgId);
     if (data.type == 'chat-message') showMessage(data);
     else if (data.type =='old-messages') 
     {
@@ -37,7 +39,7 @@ socket.onmessage = function (event) {
 };
 
 function isAnyPartOfElementInViewport(el) {
-
+    if (!el) return;
     const rect = el.getBoundingClientRect();
     const windowHeight = (window.innerHeight || document.documentElement.clientHeight);
     const windowWidth = (window.innerWidth || document.documentElement.clientWidth);
@@ -49,7 +51,7 @@ function isAnyPartOfElementInViewport(el) {
 // показать сообщение в div#subscribe
 function showMessage(data) 
 {
-    let data = JSON.parse(message);
+    //let data = JSON.parse(message);
     let messageDiv = document.createElement("div");    
     let messageNickDiv = document.createElement("div");    
     let messageTextDiv = document.createElement("div");
@@ -77,3 +79,16 @@ function showMessage(data)
     messageDiv.appendChild(messageTextDiv);    
     document.getElementById('subscribe').innerHTML = messageDiv.outerHTML + document.getElementById('subscribe').innerHTML; //prepend adds to the end for some reason, so using a workaround.
 }
+
+//Обработчик "бесконечного" скроллинга
+setInterval(function() {
+    let last = document.getElementById('subscribe').lastChild;
+    if (isAnyPartOfElementInViewport(last))
+    {
+        let data = {
+            type: 'load-more-messages',
+            currentMinId: minMsgId
+        }
+        socket.send(JSON.stringify(data));
+    }
+}, 200);
