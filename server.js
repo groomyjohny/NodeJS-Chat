@@ -23,10 +23,11 @@ const sqlConnection = mysql.createConnection({
 
 // WebSocket-сервер на порту 8081
 const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
-const sendToAll = (message) => {
+function sendToAll(message)
+{
     for (let key in clients) 
         clients[key].send(message);
-    }
+}
 
 webSocketServer.on('connection', (ws) => {
 
