@@ -16,7 +16,7 @@ document.forms.publish.onsubmit = function (event) {
     var outgoingMessage = this.message.value;
     let data = { nick: this.nick.value, message: outgoingMessage };
     let msg = JSON.stringify(data);
-    //document.getElementById("message").value = '';
+    document.getElementById("message-area").value = '';
 
     socket.send(msg);
 };
