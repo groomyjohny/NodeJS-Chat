@@ -60,9 +60,20 @@ webSocketServer.on('connection', (ws) => {
 
         if (arr.type == 'chat-message')
         {
-            const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-            sqlConnection.query(query, [arr.nick, arr.message]);
-            sendToAll(message);
+            const query = "INSERT INTO messages (nick, message) VALUES (?,?)" 
+            // UNION (SELECT LAST_INSERT_ID() AS selId FROM messages) UNION (SELECT datetime AS selDatetime FROM messages WHERE id=selId)
+            sqlConnection.query(query, [arr.nick, arr.message], (err,result,fields) => {
+                arr.id = result.insertId;
+                sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id], (err2,result2,fields2) => {
+                    if (err)
+                        console.error(err);
+                    else
+                    {
+                        arr.datetime = result2[0].datetime;
+                        sendToAll(JSON.stringify(arr));
+                    }
+                })
+            });            
         }
         else if (arr.type == "load-more-messages")
         {
