@@ -6,6 +6,17 @@ var app = new Vue({
     methods: {
         addMessage : function(msg, appendToFront)
         {
+            let searchResult = this.messages.find( (valInArr) => {
+                return valInArr.id == msg.id;
+            });
+
+            if (searchResult)
+            {
+                console.log("Attempted to add a duplicate message!");
+                console.log("Old:",searchResult,"New:",msg,"Keeping old!");
+                return false;
+            }
+
             if (appendToFront) this.messages.unshift(msg);
             else this.messages.push(msg);
         }
