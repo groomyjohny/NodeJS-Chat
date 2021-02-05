@@ -46,9 +46,10 @@ form input {
     font-weight: bold;    
     text-decoration: none;
 }
-.message-nick * img{
+.message-nick img {
     max-width: 80px;
     max-height: 20px;
+    margin-right: 2px;
 }
 .message-text, .message-nick, .message-id, .message-datetime {
     display: inline-block;
