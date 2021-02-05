@@ -30,25 +30,57 @@ function sendToAll(message)
 }
 
 webSocketServer.on('connection', (ws) => {
-
     let id = Math.random();
 
     clients[id] = ws;
-    console.log(`Hовое соединение: ${id}`);
-    sqlConnection.query("SELECT nick, message FROM messages", (err, result, fields) => {
+    console.log(`Hовое соединение: id = ${id}`);
+
+    const limit = 30;
+    const subquery = `SELECT AUTO_INCREMENT
+    FROM  INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'chat'
+    AND   TABLE_NAME   = 'messages'`;
+    const query = "SELECT id, datetime, nick, message FROM messages WHERE id > " + "( "+subquery+")-?" ;
+
+    sqlConnection.query(query, [limit], (err, result, fields) => {
         if (err) 
-            return console.err(err);
+            return console.error(err);
         else
             for (i in result)
-                sendToAll(JSON.stringify(result[i]));
+            {
+                let data = result[i];
+                data.type = 'chat-message';
+                sendToAll(JSON.stringify(data));
+            }
     });
 
     ws.on('message', (message) => {
         console.log(`Получено сообщение: ${message}`);
         const arr = JSON.parse(message);
-        const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-        sqlConnection.query(query, [arr.nick, arr.message]);
-        sendToAll(message);
+
+        if (arr.type == 'chat-message')
+        {
+            const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
+            sqlConnection.query(query, [arr.nick, arr.message]);
+            sendToAll(message);
+        }
+        else if (arr.type == "load-more-messages")
+        {
+            let newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";
+            sqlConnection.query(newQuery, [arr.currentMinId - limit, arr.currentMinId-1], (err, result, fields) => {
+                if (err) 
+                    return console.error(err);
+                else
+                {
+                    for (i in result)
+                    {
+                        let data = result[i];
+                        data.type = 'old-messages';
+                        ws.send(JSON.stringify(data));
+                    }
+                }
+            });
+        }
     });
 
     ws.on('close', () => {
@@ -56,7 +88,6 @@ webSocketServer.on('connection', (ws) => {
         delete clients[id];
     });
 });
-
 
 // обычный сервер (статика) на порту 8080
 const fileServer = new Static.Server('.');
