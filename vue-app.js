@@ -12,8 +12,7 @@ var app = new Vue({
 
             if (searchResult)
             {
-                console.log("Attempted to add a duplicate message!");
-                console.log("Old:",searchResult,"New:",msg,"Keeping old!");
+                console.log("Attempted to add a duplicate message!","Old:",searchResult,"New:",msg,"Keeping old!");
                 return false;
             }
 
