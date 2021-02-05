@@ -18,7 +18,7 @@ const sqlConnection = mysql.createConnection({
     host: dbname,
     user: dbuser,
     database: dbdatabase,
-    password: ""
+    password: dbpassword
 }); 
 
 // WebSocket-сервер на порту 8081
