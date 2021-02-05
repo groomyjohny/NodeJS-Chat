@@ -53,34 +53,7 @@ function isAnyPartOfElementInViewport(el) {
 // показать сообщение в div#subscribe
 function showMessage(data, appendToFront = true) 
 {
-    let messageDiv = document.createElement("div");    
-    let messageNickDiv = document.createElement("div");    
-    let messageTextDiv = document.createElement("div");
-    if (data.id && data.datetime)
-    {
-        let messageIdDiv = document.createElement("div");
-        let messageDateTimeDiv = document.createElement("div");
-
-        messageIdDiv.className = "message-id";
-        messageDateTimeDiv.className = "message-datetime";
-        messageIdDiv.innerHTML = data.id;
-        messageDateTimeDiv.innerHTML = data.datetime;
-
-        messageDiv.appendChild(messageIdDiv);
-        messageDiv.appendChild(messageDateTimeDiv);
-    }
-    
-    messageDiv.className = "message";
-    messageNickDiv.className = "message-nick";
-    messageTextDiv.className = "message-text";    
-    messageNickDiv.innerHTML = data.nick;    
-    messageTextDiv.innerHTML = data.message;
-    
-    messageDiv.appendChild(messageNickDiv);
-    messageDiv.appendChild(messageTextDiv);  
-    let parent = document.getElementById('subscribe');  
-    if (appendToFront) parent.innerHTML = messageDiv.outerHTML + document.getElementById('subscribe').innerHTML; //prepend adds to the end for some reason, so using a workaround.
-    else parent.appendChild(messageDiv);
+    app.addMessage(data, appendToFront);
 }
 
 //Обработчик "бесконечного" скроллинга

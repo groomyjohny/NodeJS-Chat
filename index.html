@@ -18,9 +18,19 @@
 </form>
 
 <!-- здесь будут появляться входящие сообщения -->
-<div id="subscribe"></div>
+<div id="subscribe">
+  <div v-for="msg in messages" class="message">
+    <div class="message-id" v-html="msg.id"></div>
+    <div class="message-datetime" v-html="msg.datetime"></div>
+    <div class="message-nick" v-html="msg.nick"></div>
+    <div class="message-text" v-html="msg.message"></div>
+  </div>
+</div>
 
 <script src="browser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="vue-app.js"></script>
+
 
 </body>
 </html>
