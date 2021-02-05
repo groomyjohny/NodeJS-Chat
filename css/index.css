@@ -23,7 +23,8 @@ form * {
     text-align: center; 
 }
 form div { 
-    width: 100%; 
+  width: 100%; 
+  text-align: left;
 }
 form textarea { 
     width: 100%;
