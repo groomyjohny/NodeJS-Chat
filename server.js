@@ -65,8 +65,8 @@ webSocketServer.on('connection', (ws) => {
             sqlConnection.query(query, [arr.nick, arr.message], (err,result,fields) => {
                 arr.id = result.insertId;
                 sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id], (err2,result2,fields2) => {
-                    if (err)
-                        console.error(err);
+                    if (err2)
+                        console.error(err2);
                     else
                     {
                         arr.datetime = result2[0].datetime;
