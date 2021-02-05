@@ -61,3 +61,7 @@ form input {
 #message-area {
     height: 150px;
 }
+
+.message-reply-link {
+    text-decoration: underline;
+}
