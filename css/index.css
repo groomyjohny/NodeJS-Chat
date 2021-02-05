@@ -1,13 +1,5 @@
-.message-text, .message-nick, .message-id, .message-datetime {
-    display: inline-block;
-    margin-right: 5px;
-}
 * { 
     font-family: 'Roboto', sans-serif;
-}
-.message-nick {
-    font-weight: bold;    
-    text-decoration: none;
 }
 form {
     display: flex; 
@@ -23,8 +15,8 @@ form * {
     text-align: center; 
 }
 form div { 
-  width: 100%; 
-  text-align: left;
+    width: 100%; 
+    text-align: left;
 }
 form textarea { 
     width: 100%;
@@ -32,12 +24,6 @@ form textarea {
 }
 textarea {
     text-align: left;
-}
-#nick-area {
-    height: 80px;
-}
-#message-area {
-    height: 150px;
 }
 form input { 
     align-self: center;
@@ -52,6 +38,25 @@ form input {
     color: white;
     transition: 0.18s;
 }
+
 #subscribe {
     margin-left:10px;
+}
+.message-nick {
+    font-weight: bold;    
+    text-decoration: none;
+}
+.message-nick * img{
+    max-width: 80px;
+    max-height: 20px;
+}
+.message-text, .message-nick, .message-id, .message-datetime {
+    display: inline-block;
+    margin-right: 5px;
+}
+#nick-area {
+    height: 80px;
+}
+#message-area {
+    height: 150px;
 }
