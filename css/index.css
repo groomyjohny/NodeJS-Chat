@@ -64,4 +64,5 @@ form input {
 
 .message-reply-link {
     text-decoration: underline;
+    cursor: pointer;
 }
