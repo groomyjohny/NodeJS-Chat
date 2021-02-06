@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Фев 05 2021 г., 12:05
+-- Время создания: Фев 06 2021 г., 22:42
 -- Версия сервера: 10.4.17-MariaDB
 -- Версия PHP: 8.0.0
 
@@ -36,8 +36,28 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `salt` varchar(1024) DEFAULT NULL,
   `message` mediumtext DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=162 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `replies` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parentId` bigint(20) DEFAULT NULL,
+  `childId` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `parentId` (`parentId`),
+  KEY `childId` (`childId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Ограничения внешнего ключа сохраненных таблиц
+--
+
+--
+-- Ограничения внешнего ключа таблицы `replies`
+--
+ALTER TABLE `replies`
+  ADD CONSTRAINT `replies_ibfk_1` FOREIGN KEY (`parentId`) REFERENCES `messages` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `replies_ibfk_2` FOREIGN KEY (`childId`) REFERENCES `messages` (`id`) ON DELETE SET NULL;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
