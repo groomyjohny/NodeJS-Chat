@@ -39,7 +39,7 @@ var app = new Vue({
             if (!msg) return "Ошибка: renderMessage вызвано с msg == "+msg;
             const levelOffset = 1;
             let s = '';
-            for (let i = 0; i < offset; ++i) s += '<div class="message-reply-spacer"/>';
+            for (let i = 0; i < offset; ++i) s += '<div class="message-reply-spacer"></div>';
             s += `<div class="message-id">${msg.id}</div>
             <div class="message-datetime">${msg.datetime}</div>
             <div class="message-nick">${msg.nick}</div>`;
