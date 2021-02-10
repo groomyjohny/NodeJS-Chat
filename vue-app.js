@@ -29,6 +29,11 @@ var app = new Vue({
                     this.replyList.push(id);
         },
 
+        getReplyList : function () 
+        {
+            return this.replyList;    
+        },
+
         renderMessage : function(msg, offset = 0)
         {
             if (!msg) return "Ошибка: renderMessage вызвано с msg == "+msg;
@@ -40,9 +45,12 @@ var app = new Vue({
             <div class="message-nick">${msg.nick}</div>`;
             if (msg.replyList)
             {
-                for (item in replyList) 
+                msg.replyList.forEach(element => {
+                    s += this.renderMessage(this.getMessageById(element),offset + levelOffset)
+                });
+                for (item in msg.replyList) 
                 {
-                    s += this.renderMessage(this.getMessageById(msg[item].id),offset + levelOffset)
+                    
                 }
             }
             s += `<div class="message-text">${msg.message}</div>

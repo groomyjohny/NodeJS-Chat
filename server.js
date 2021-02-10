@@ -56,10 +56,11 @@ webSocketServer.on('connection', (ws) => {
     ws.on('message', (message) => {
         console.log(`Получено сообщение: ${message}`);
         const arr = JSON.parse(message);
+        if (arr.replyList) arr.replyList.sort();
 
         if (arr.type == 'chat-message')
         {
-            const query = "INSERT INTO messages (nick, message) VALUES (?,?)" 
+            const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
             sqlConnection.query(query, [arr.nick, arr.message], (err,result,fields) => {
                 arr.id = result.insertId;
                 sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id], (err2,result2,fields2) => {
