@@ -1,7 +1,7 @@
 const WebSocketServer = new require('ws');
 const Static = require('node-static');
 const { Socket } = require('dgram');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const http = require('http');
 
 const ports = [8080, 8081];
@@ -14,7 +14,7 @@ const dbuser = `root`;
 const dbdatabase = `chat`;
 const dbpassword = ``;
 
-const sqlConnection = mysql.createConnection({
+const sqlConnection = await mysql.createConnection({
     host: dbname,
     user: dbuser,
     database: dbdatabase,
@@ -28,7 +28,7 @@ function sendToAll(message)
         clients[key].send(message);
 }
 
-webSocketServer.on('connection', (ws) => {
+webSocketServer.on('connection', async (ws) => {
     let id = Math.random();
 
     clients[id] = ws;
@@ -41,67 +41,62 @@ webSocketServer.on('connection', (ws) => {
     AND   TABLE_NAME   = 'messages'`;
     const query = "SELECT id, datetime, nick, message FROM messages WHERE id > " + "( "+subquery+")-?" ;
 
-    sqlConnection.query(query, [limit], (err, result, fields) => {
-        if (err) 
-            return console.error(err);
-        else
-            for (i in result)
-            {
-                let data = result[i];
-                data.type = 'chat-message';
-                sendToAll(JSON.stringify(data));
-            }
-    });
-
-    ws.on('message', (message) => {
-        console.log(`Получено сообщение: ${message}`);
-        const arr = JSON.parse(message);
-        if (arr.replyList) arr.replyList.sort();
-
-        if (arr.type == 'chat-message')
+    try
+    {
+        let result = await sqlConnection.query(query, [limit]);
+        for (i in result)
         {
-            const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-            sqlConnection.query(query, [arr.nick, arr.message], (err,result,fields) => {
-                arr.id = result.insertId;
+            let data = result[i];
+            data.type = 'chat-message';
+            sendToAll(JSON.stringify(data));
+        }
+    }
+    catch (err)
+    {
+        console.log(err);
+    }
+
+    ws.on('message', async (message) => {
+        try
+        {
+            console.log(`Получено сообщение: ${message}`);
+            const arr = JSON.parse(message);
+            if (arr.replyList) arr.replyList.sort();
+
+            if (arr.type == 'chat-message')
+            {
+                const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
+                let insertResult = await sqlConnection.query(query, [arr.nick, arr.message])
+
+                arr.id = insertResult.insertId;
                 if (arr.replyList.length)
                 {
                     let replyValuesArr = [];
                     arr.replyList.forEach(element => {
                         replyValuesArr.push([arr.id, element]);
                     });
-                    sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr], (err3, result3, fields3) => {
-                        if (err3) console.err(err3);
-                    });
+                    sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
                 }
 
-                sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id], (err2,result2,fields2) => {
-                    if (err2)
-                        console.error(err2);
-                    else
-                    {
-                        arr.datetime = result2[0].datetime;
-                        sendToAll(JSON.stringify(arr));
-                    }
-                })
-            });            
-        }
-        
-        else if (arr.type == "load-more-messages")
-        {
-            let newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";
-            sqlConnection.query(newQuery, [arr.currentMinId - limit, arr.currentMinId-1], (err, result, fields) => {
-                if (err) 
-                    return console.error(err);
-                else
+                let datetimeResult = await sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
+                arr.datetime = datetimeResult[0].datetime;
+                sendToAll(JSON.stringify(arr));
+            }        
+            else if (arr.type == "load-more-messages")
+            {
+                const newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";
+                let selectResults = await sqlConnection.query(newQuery, [arr.currentMinId - limit, arr.currentMinId-1]);
+                for (i in selectResults)
                 {
-                    for (i in result)
-                    {
-                        let data = result[i];
-                        data.type = 'old-messages';
-                        ws.send(JSON.stringify(data));
-                    }
+                    let data = result[i];
+                    data.type = 'old-messages';
+                    ws.send(JSON.stringify(data));
                 }
-            });
+            }
+        }
+        catch (err)
+        {
+            console.log(err);
         }
     });
 
