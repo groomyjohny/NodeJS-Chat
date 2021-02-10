@@ -19,6 +19,16 @@ var app = new Vue({
             else this.messages.push(msg);
         },
 
+        addToReplyList : function(id)
+        {
+            if (!this.getMessageById(id)) console.log("Attempted to add wrong id to reply list", id, ", ignoring.")
+            else 
+                if (this.replyList.find( (valInArr) => {return valInArr == id}))
+                    console.log("Attempted to add duplicate id to reply list", id, ", ignoring.");
+                else
+                    this.replyList.push(id);
+        },
+
         renderMessage : function(msg, offset = 0)
         {
             if (!msg) return "Ошибка: renderMessage вызвано с msg == "+msg;
@@ -36,7 +46,7 @@ var app = new Vue({
                 }
             }
             s += `<div class="message-text">${msg.message}</div>
-            <a class="message-reply-link" onclick="app.replyList.push(${msg.id})">Ответить</a>`;
+            <a class="message-reply-link" onclick="app.addToReplyList(${msg.id})">Ответить</a>`;
             return s;
         },
 
