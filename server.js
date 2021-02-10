@@ -63,6 +63,17 @@ webSocketServer.on('connection', (ws) => {
             const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
             sqlConnection.query(query, [arr.nick, arr.message], (err,result,fields) => {
                 arr.id = result.insertId;
+                if (arr.replyList.length)
+                {
+                    let replyValuesArr = [];
+                    arr.replyList.forEach(element => {
+                        replyValuesArr.push([arr.id, element]);
+                    });
+                    sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr], (err3, result3, fields3) => {
+                        if (err3) console.err(err3);
+                    });
+                }
+
                 sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id], (err2,result2,fields2) => {
                     if (err2)
                         console.error(err2);
@@ -74,6 +85,7 @@ webSocketServer.on('connection', (ws) => {
                 })
             });            
         }
+        
         else if (arr.type == "load-more-messages")
         {
             let newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";

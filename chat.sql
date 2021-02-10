@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Фев 06 2021 г., 22:42
+-- Время создания: Фев 10 2021 г., 06:07
 -- Версия сервера: 10.4.17-MariaDB
--- Версия PHP: 8.0.0
+-- Версия PHP: 8.0.2
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -38,8 +38,14 @@ CREATE TABLE IF NOT EXISTS `messages` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `replies`
+--
+
 CREATE TABLE IF NOT EXISTS `replies` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `parentId` bigint(20) DEFAULT NULL,
   `childId` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
