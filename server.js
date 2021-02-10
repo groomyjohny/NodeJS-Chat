@@ -46,12 +46,12 @@ webSocketServer.on('connection', async (ws) => {
     try
     {
         let result = await sqlConnection.query(query, [limit]);
-        for (i in result)
+        result[0].forEach(el =>
         {
-            let data = result[i];
+            let data = el;
             data.type = 'chat-message';
             sendToAll(JSON.stringify(data));
-        }
+        });
     }
     catch (err)
     {
@@ -70,7 +70,7 @@ webSocketServer.on('connection', async (ws) => {
                 const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
                 let insertResult = await sqlConnection.query(query, [arr.nick, arr.message])
 
-                arr.id = insertResult.insertId;
+                arr.id = insertResult[0].insertId;
                 if (arr.replyList.length)
                 {
                     let replyValuesArr = [];
@@ -81,19 +81,19 @@ webSocketServer.on('connection', async (ws) => {
                 }
 
                 let datetimeResult = await sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
-                arr.datetime = datetimeResult[0].datetime;
+                arr.datetime = datetimeResult[0][0].datetime;
                 sendToAll(JSON.stringify(arr));
             }        
             else if (arr.type == "load-more-messages")
             {
                 const newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";
                 let selectResults = await sqlConnection.query(newQuery, [arr.currentMinId - limit, arr.currentMinId-1]);
-                for (i in selectResults)
+                selectResults[0].forEach(el =>
                 {
-                    let data = result[i];
+                    let data = el;
                     data.type = 'old-messages';
                     ws.send(JSON.stringify(data));
-                }
+                });
             }
         }
         catch (err)
