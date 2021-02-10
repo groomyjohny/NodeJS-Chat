@@ -4,6 +4,8 @@ const { Socket } = require('dgram');
 const mysql = require('mysql2/promise');
 const http = require('http');
 
+async function main() 
+{
 const ports = [8080, 8081];
 
 // подключенные клиенты
@@ -114,3 +116,6 @@ http.createServer( (req, res) => {
 }).listen(ports[0]);
 
 console.log(`Сервер запущен на портах ${ports[0]}, ${ports[1]}`);
+}
+
+main();
