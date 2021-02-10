@@ -118,4 +118,12 @@ http.createServer( (req, res) => {
 console.log(`Сервер запущен на портах ${ports[0]}, ${ports[1]}`);
 }
 
+console.log(process.env.NODE_OPTIONS, process.env.VSCODE_INSPECTOR_OPTIONS)
+try
+{
 main();
+}
+catch (err)
+{
+    console.error(err);
+}
