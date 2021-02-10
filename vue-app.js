@@ -1,7 +1,8 @@
 var app = new Vue({
     el: '#subscribe',
     data: {
-      messages: []
+      messages: [],
+      replyList: []
     },
     methods: {
         addMessage : function(msg, appendToFront)
@@ -35,7 +36,7 @@ var app = new Vue({
                 }
             }
             s += `<div class="message-text">${msg.message}</div>
-            <a class="message-reply-link">Ответить</a>`;
+            <a class="message-reply-link" onclick="app.replyList.push(${msg.id})">Ответить</a>`;
             return s;
         },
 

@@ -20,15 +20,18 @@
     <input type="submit" value="Отправить" id="message-submit-button" />
   </form>
 
+  
   <!-- здесь будут появляться входящие сообщения -->
   <div id="subscribe">
+    <div id="reply-list-div" v-if="this.replyList.length" v-html="'В этом сообщении вы отвечаете на: ' + this.replyList.join(', ')"></div>
     <div v-for="msg in messages" class="message" v-html="renderMessage(msg)">
     </div>
   </div>
 
-  <script src="browser.js"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
   <script src="vue-app.js"></script>
+  <script src="browser.js"></script>
 </body>
 
 </html>
