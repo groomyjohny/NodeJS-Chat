@@ -33,6 +33,10 @@ var app = new Vue({
         {
             return this.replyList;    
         },
+        clearReplyList : function () 
+        {
+            this.replyList = [];    
+        },
 
         renderMessage : function(msg, offset = 0)
         {

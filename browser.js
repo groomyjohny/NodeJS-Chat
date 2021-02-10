@@ -17,6 +17,8 @@ document.forms.publish.addEventListener("submit", function (event) {
     event.preventDefault();    
     var outgoingMessage = this.message.value;
     let data = { type: 'chat-message', nick: this.nick.value, message: outgoingMessage, replyList: app.getReplyList() };
+    app.clearReplyList();
+
     localStorage.setItem('savedNick',data.nick);
     let msg = JSON.stringify(data);
     document.getElementById("message-area").value = '';
