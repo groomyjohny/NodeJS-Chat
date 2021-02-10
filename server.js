@@ -21,7 +21,6 @@ const sqlConnection = mysql.createConnection({
     password: dbpassword
 }); 
 
-// WebSocket-сервер на порту 8081
 const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
 function sendToAll(message)
 {
@@ -61,7 +60,6 @@ webSocketServer.on('connection', (ws) => {
         if (arr.type == 'chat-message')
         {
             const query = "INSERT INTO messages (nick, message) VALUES (?,?)" 
-            // UNION (SELECT LAST_INSERT_ID() AS selId FROM messages) UNION (SELECT datetime AS selDatetime FROM messages WHERE id=selId)
             sqlConnection.query(query, [arr.nick, arr.message], (err,result,fields) => {
                 arr.id = result.insertId;
                 sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id], (err2,result2,fields2) => {
