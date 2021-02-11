@@ -63,11 +63,11 @@ async function main()
             try
             {
                 console.log(`Получено сообщение: ${message}`);
-                const arr = JSON.parse(message);
-                if (arr.replyList) arr.replyList.sort();
+                const arr = JSON.parse(message);                
 
                 if (arr.type == 'chat-message')
                 {
+                    if (arr.replyList) arr.replyList.sort();
                     const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
                     let insertResult = await sqlConnection.query(query, [arr.nick, arr.message])
 
