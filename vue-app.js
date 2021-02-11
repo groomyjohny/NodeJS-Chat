@@ -72,7 +72,6 @@ var app = new Vue({
             let searchResult = this.messages.find(el => { return el.id == id});
             if (searchResult) return searchResult;
             else return undefined;
-            //else //todo: add a get-message request from server
         },
 
         getMessageByIdPromise : function(id) //returns a promise containing a message object by ID. Will try to get a message from database if it is not present in array
