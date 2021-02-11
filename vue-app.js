@@ -59,7 +59,6 @@ var app = new Vue({
                     let element = msg.replyList[i];
                     let msgObject = await this.getMessageByIdPromise(element);
                     s += '<div class="message-reply">' + await this.renderMessagePromise(msgObject,offset + 1) + "</div>";
-                    console.log(s);
                 }
             }
             s += `<div class="message-text">${msg.message}</div>
@@ -84,7 +83,7 @@ var app = new Vue({
 
                 let result;
                 let intervalId = setInterval(function(){
-                    result = this.getMessageById(id);
+                    result = app.getMessageById(id);
                     if (result)
                     {
                         clearInterval(intervalId);
