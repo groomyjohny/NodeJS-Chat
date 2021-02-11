@@ -64,6 +64,7 @@ function showMessage(data)
 function sendGetOlderMessagesRequest()
 {
     let lowerBoundIndex = Math.max(msgIdListIndexHigh-30,0);
+    if (lowerBoundIndex == msgIdListIndexHigh) return;
     let data = {
         type: 'get-messages',
         range: [msgIdList[lowerBoundIndex], msgIdList[msgIdListIndexHigh-1]],
@@ -73,7 +74,8 @@ function sendGetOlderMessagesRequest()
 }
 //Обработчик "бесконечного" скроллинга
 setInterval(function() {
-    let last = document.getElementById('subscribe').lastChild;
+    let lastArr = document.querySelectorAll('#subscribe, .message');
+    let last = lastArr[lastArr.length-1];
     if (isAnyPartOfElementInViewport(last))
     {     
         sendGetOlderMessagesRequest();

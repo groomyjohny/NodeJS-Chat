@@ -9,9 +9,7 @@ const Chat = {
         {
             this.messages[msg.id] = {};
             this.messages[msg.id].object = msg;
-            this.renderMessagePromise(msg).then( function(s) {
-                app.messages[msg.id].html = s;
-            })
+            this.renderMessagePromise(msg).then( (s) => { app.messages[msg.id].html = s; })
             return true;
         },
 
