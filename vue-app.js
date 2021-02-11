@@ -58,11 +58,32 @@ var app = new Vue({
             return s;
         },
 
-        getMessageById : function(id)
+        getMessageById : function(id) //returns message object by ID if it is present in array or undefined if it is not.
         {
             let searchResult = this.messages.find(el => { return el.id == id});
             if (searchResult) return searchResult;
+            else return undefined;
             //else //todo: add a get-message request from server
+        },
+
+        getMessageByIdPromise : function(id) //returns a promise containing a message object by ID. Will try to get a message from database if it is not present in array
+        {
+            let searchResult = this.getMessageById(id);
+            if (searchResult) return new Promise((resolve) => resolve(searchResult));
+            else return new Promise( (resolve, reject) => {
+                data = { type: "get-messages", id: id };
+                socket.send(JSON.stringify(data));
+
+                let result;
+                let intervalId = setInterval(function(){
+                    result = this.getMessageById(id);
+                    if (result)
+                    {
+                        clearInterval(intervalId);
+                        resolve(result);
+                    }
+                }, 500);
+            });
         }
     }
   })
