@@ -24,8 +24,7 @@
   <!-- здесь будут появляться входящие сообщения -->
   <div id="subscribe">
     <div id="reply-list-div" v-if="this.replyList.length" v-html="'В этом сообщении вы отвечаете на: ' + this.replyList.join(', ')"></div>
-    <div v-for="msg in messages" class="message" v-html="renderMessage(msg)">
-    </div>
+    <div v-for="msg in messageHTML" class="message" v-html="msg"></div>
   </div>
 
   

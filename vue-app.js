@@ -2,6 +2,7 @@ var app = new Vue({
     el: '#subscribe',
     data: {
       messages: [],
+      messageHTML: [],
       replyList: []
     },
     methods: {
@@ -16,6 +17,9 @@ var app = new Vue({
             }
 
             this.messages.splice(index,0,msg);
+            this.renderMessagePromise(msg).then( function(s) {
+                app.messageHTML.splice(index,0,s);
+            })
             return true;
         },
 
@@ -38,20 +42,25 @@ var app = new Vue({
             this.replyList = [];    
         },
 
-        renderMessage : function(msg, offset = 0)
+        renderMessagePromise : async function(msg, offset = 0)
         {
             let s = '';
             for (let i = 0; i < offset; ++i) s += '<div class="message-reply-spacer"></div>';
-            if (!msg) return s + "Ошибка: renderMessage вызвано с msg == "+msg;
+            if (!msg) return s + "Ошибка: renderMessagePromise вызвано с msg == "+msg;
 
             s += `<div class="message-id">${msg.id}</div>
             <div class="message-datetime">${msg.datetime}</div>
             <div class="message-nick">${msg.nick}</div>`;
             if (msg.replyList)
             {
-                msg.replyList.forEach(element => {
-                    s += '<div class="message-reply">' + this.renderMessage(this.getMessageById(element),offset + 1) + "</div>";
-                });
+                //await msg.replyList.forEach(async element => {
+                for (let i = 0; i < msg.replyList.length; ++i)
+                {
+                    let element = msg.replyList[i];
+                    let msgObject = await this.getMessageByIdPromise(element);
+                    s += '<div class="message-reply">' + await this.renderMessagePromise(msgObject,offset + 1) + "</div>";
+                    console.log(s);
+                }
             }
             s += `<div class="message-text">${msg.message}</div>
             <a class="message-reply-link" onclick="app.addToReplyList(${msg.id})">Ответить</a>`;
