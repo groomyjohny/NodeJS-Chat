@@ -96,7 +96,7 @@ async function main()
                     }
                     else if (arr.id) //get single message with specific id
                     {
-                        queryFilter = "id = ";
+                        queryFilter = "id = ?";
                         queryParams = [arr.id];
                     }
                     
