@@ -36,18 +36,15 @@ async function main()
         clients[id] = ws;
         console.log(`Hовое соединение: id = ${id}`);
 
-        const limit = 30;
-        const subquery = `SELECT AUTO_INCREMENT
-        FROM  INFORMATION_SCHEMA.TABLES
-        WHERE TABLE_SCHEMA = 'chat'
-        AND   TABLE_NAME   = 'messages'`;
-        const query = "SELECT id, datetime, nick, message FROM messages WHERE id > " + "( "+subquery+")-?" ;
-        //const query = "SELECT id, datetime, nick, message FROM messages WHERE id 
-
+        const query = "SELECT id FROM messages";
         try
         {
-            let result = await sqlConnection.query(subquery);
-            let data = { type: "last-msg-id", id: result[0][0].AUTO_INCREMENT };
+            let result = await sqlConnection.query(query);
+            let msgIdList = [];
+            result[0].forEach(el => {
+                msgIdList.push(el.id);
+            })
+            let data = { type: "msg-id-list", idList: msgIdList };
             ws.send(JSON.stringify(data));
         }
         catch (err)

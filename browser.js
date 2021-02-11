@@ -26,7 +26,9 @@ document.forms.publish.addEventListener("submit", function (event) {
     socket.send(msg);
 });
 
-let minMsgId = undefined;
+let msgIdList;
+let msgIdListIndexLow = 0;
+let msgIdListIndexHigh;
 
 socket.onopen = function (event) {}
 // обработчик входящих сообщений
@@ -34,13 +36,11 @@ socket.onmessage = function (event) {
     var incomingMessage = event.data;
     let data = JSON.parse(incomingMessage);
 
-    if (!minMsgId) minMsgId = data.id;
-    else minMsgId = Math.min(data.id,minMsgId);
-
     if (data.type == 'chat-message') showMessage(data);
-    if (data.type == 'last-msg-id') 
+    if (data.type == 'msg-id-list') 
     {
-        minMsgId = data.id;
+        msgIdList = data.idList;
+        msgIdListIndexHigh = msgIdList.length;
         sendGetOlderMessagesRequest();
     }
 };
@@ -63,11 +63,12 @@ function showMessage(data)
 
 function sendGetOlderMessagesRequest()
 {
+    let lowerBoundIndex = Math.max(msgIdListIndexHigh-30,0);
     let data = {
         type: 'get-messages',
-        range: [minMsgId-30, minMsgId],
-        limit: 30
+        range: [msgIdList[lowerBoundIndex], msgIdList[msgIdListIndexHigh-1]],
     }
+    msgIdListIndexHigh = lowerBoundIndex;
     socket.send(JSON.stringify(data));
 }
 //Обработчик "бесконечного" скроллинга
