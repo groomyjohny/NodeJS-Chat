@@ -1,9 +1,9 @@
-var app = new Vue({
-    el: '#subscribe',
-    data: {
-      messages: {},
-      replyList: []
-    },
+const Chat = {
+    data : () => (
+    {
+        messages: {},
+        replyList: []
+    }),
     methods: {
         addMessage : function(msg)
         {
@@ -83,5 +83,6 @@ var app = new Vue({
             });
         }
     }
-  })
+}
 
+var app = Vue.createApp(Chat).mount('#subscribe');
