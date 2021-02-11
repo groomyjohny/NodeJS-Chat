@@ -60,9 +60,9 @@ var app = new Vue({
 
         getMessageById : function(id)
         {
-            return this.messages.find( (valInArr) => {
-                return valInArr.id == id;
-            });
+            let searchResult = this.messages.find(el => { return el.id == id});
+            if (searchResult) return searchResult;
+            //else //todo: add a get-message request from server
         }
     }
   })

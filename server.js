@@ -105,10 +105,13 @@ async function main()
                     }
                     
                     let selectResults = await sqlConnection.query(queryBase+queryFiler,queryParams);
-                    selectResults[0].forEach(el =>
+                    selectResults[0].forEach(async el =>
                     {
                         let data = el;
                         data.type = 'chat-message';
+                        let replyListSelectResults = await sqlConnection.query("SELECT childId FROM replies WHERE parentId = ?",[el.id]);
+                        data.replyList = [];
+                        replyListSelectResults[0].forEach(el => { data.replyList.push(el.childId) });
                         ws.send(JSON.stringify(data));
                     });
                 }
