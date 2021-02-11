@@ -75,9 +75,7 @@ async function main()
                     if (arr.replyList.length)
                     {
                         let replyValuesArr = [];
-                        arr.replyList.forEach(element => {
-                            replyValuesArr.push([arr.id, element]);
-                        });
+                        arr.replyList.forEach(el => { replyValuesArr.push([arr.id, el]);});
                         sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
                     }
 
