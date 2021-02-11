@@ -5,18 +5,18 @@ var app = new Vue({
       replyList: []
     },
     methods: {
-        addMessage : function(msg, appendToFront)
+        addMessage : function(msg)
         {
-            let searchResult = this.getMessageById(msg.id);
-
-            if (searchResult)
+            let index = 0;
+            while (index < this.messages.length && msg.id < this.messages[index].id) ++index;
+            if (this.messages[index] && this.messages[index].id == msg.id)
             {
-                console.log("Attempted to add a duplicate message!","Old:",searchResult,"New:",msg,"Keeping old!");
+                console.log("Attempted to add a duplicate message! ID: ", msg.id, "Keeping old!");
                 return false;
             }
 
-            if (appendToFront) this.messages.unshift(msg);
-            else this.messages.push(msg);
+            this.messages.splice(index,0,msg);
+            return true;
         },
 
         addToReplyList : function(id)

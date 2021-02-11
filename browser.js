@@ -36,10 +36,6 @@ socket.onmessage = function (event) {
     else minMsgId = Math.min(data.id,minMsgId);
 
     if (data.type == 'chat-message') showMessage(data);
-    else if (data.type =='old-messages') 
-    {
-        showMessage(data,false);
-    }
 };
 
 function isAnyPartOfElementInViewport(el) {
@@ -53,9 +49,9 @@ function isAnyPartOfElementInViewport(el) {
     return (vertInView && horInView);
 }
 // показать сообщение в div#subscribe
-function showMessage(data, appendToFront = true) 
+function showMessage(data) 
 {
-    app.addMessage(data, appendToFront);
+    app.addMessage(data);
 }
 
 //Обработчик "бесконечного" скроллинга
