@@ -46,13 +46,9 @@ async function main()
 
         try
         {
-            let result = await sqlConnection.query(query, [limit]);
-            result[0].forEach(el =>
-            {
-                let data = el;
-                data.type = 'chat-message';
-                sendToAll(JSON.stringify(data));
-            });
+            let result = await sqlConnection.query(subquery);
+            let data = { type: "last-msg-id", id: result[0][0].AUTO_INCREMENT };
+            ws.send(JSON.stringify(data));
         }
         catch (err)
         {
@@ -86,15 +82,15 @@ async function main()
                 else if (arr.type == "get-messages")
                 {
                     let queryBase = 'SELECT id, datetime, nick, message FROM messages WHERE ';
-                    let queryFiler = '';
+                    let queryFilter = '';
                     let queryParams;
                     if (arr.range) //get messages with id in range, limit is optional
                     {
-                        queryFiler = "id BETWEEN ? AND ?";
-                        queryParams = [ arr.range[0] ? arr.range[0] : 0, arr.range[1] ? arr.range[1] : '18446744073709551615'];
+                        queryFilter = "id BETWEEN ? AND ?";
+                        queryParams = [ arr.range[0] ? arr.range[0] : 0, arr.range[1] ? arr.range[1] : 18446744073709551615n];
                         if (arr.limit)
                         {
-                            queryFiler += " LIMIT ?";
+                            queryFilter += " LIMIT ?";
                             queryParams.push(arr.limit); 
                         }                        
                     }
@@ -104,7 +100,7 @@ async function main()
                         queryParams = [arr.id];
                     }
                     
-                    let selectResults = await sqlConnection.query(queryBase+queryFiler,queryParams);
+                    let selectResults = await sqlConnection.query(queryBase+queryFilter,queryParams);
                     selectResults[0].forEach(async el =>
                     {
                         let data = el;
@@ -118,7 +114,7 @@ async function main()
             }
             catch (err)
             {
-                console.log(err);
+                console.error(err);
             }
         });
 

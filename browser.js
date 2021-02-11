@@ -27,6 +27,8 @@ document.forms.publish.addEventListener("submit", function (event) {
 });
 
 let minMsgId = undefined;
+
+socket.onopen = function (event) {}
 // обработчик входящих сообщений
 socket.onmessage = function (event) {
     var incomingMessage = event.data;
@@ -36,6 +38,11 @@ socket.onmessage = function (event) {
     else minMsgId = Math.min(data.id,minMsgId);
 
     if (data.type == 'chat-message') showMessage(data);
+    if (data.type == 'last-msg-id') 
+    {
+        minMsgId = data.id;
+        sendGetOlderMessagesRequest();
+    }
 };
 
 function isAnyPartOfElementInViewport(el) {
@@ -54,16 +61,20 @@ function showMessage(data)
     app.addMessage(data);
 }
 
+function sendGetOlderMessagesRequest()
+{
+    let data = {
+        type: 'get-messages',
+        range: [minMsgId-30, minMsgId],
+        limit: 30
+    }
+    socket.send(JSON.stringify(data));
+}
 //Обработчик "бесконечного" скроллинга
 setInterval(function() {
     let last = document.getElementById('subscribe').lastChild;
     if (isAnyPartOfElementInViewport(last))
     {     
-        let data = {
-            type: 'get-messages',
-            range: [minMsgId-30, minMsgId],
-            limit: 30
-        }
-        socket.send(JSON.stringify(data));
+        sendGetOlderMessagesRequest();
     }
 }, 200);
