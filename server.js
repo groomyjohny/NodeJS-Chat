@@ -42,6 +42,7 @@ async function main()
         WHERE TABLE_SCHEMA = 'chat'
         AND   TABLE_NAME   = 'messages'`;
         const query = "SELECT id, datetime, nick, message FROM messages WHERE id > " + "( "+subquery+")-?" ;
+        //const query = "SELECT id, datetime, nick, message FROM messages WHERE id 
 
         try
         {
@@ -84,14 +85,32 @@ async function main()
                     arr.datetime = datetimeResult[0][0].datetime;
                     sendToAll(JSON.stringify(arr));
                 }        
-                else if (arr.type == "load-more-messages")
+                else if (arr.type == "get-messages")
                 {
-                    const newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";
-                    let selectResults = await sqlConnection.query(newQuery, [arr.currentMinId - limit, arr.currentMinId-1]);
+                    let queryBase = 'SELECT id, datetime, nick, message FROM messages WHERE ';
+                    let queryFiler = '';
+                    let queryParams;
+                    if (arr.range) //get messages with id in range, limit is optional
+                    {
+                        queryFiler = "id BETWEEN ? AND ?";
+                        queryParams = [ arr.range[0] ? arr.range[0] : 0, arr.range[1] ? arr.range[1] : '18446744073709551615'];
+                        if (arr.limit)
+                        {
+                            queryFiler += " LIMIT ?";
+                            queryParams.push(arr.limit); 
+                        }                        
+                    }
+                    else if (arr.id) //get single message with specific id
+                    {
+                        queryFilter = "id = ";
+                        queryParams = [arr.id];
+                    }
+                    
+                    let selectResults = await sqlConnection.query(queryBase+queryFiler,queryParams);
                     selectResults[0].forEach(el =>
                     {
                         let data = el;
-                        data.type = 'old-messages';
+                        data.type = 'chat-message';
                         ws.send(JSON.stringify(data));
                     });
                 }

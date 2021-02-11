@@ -62,10 +62,11 @@ function showMessage(data, appendToFront = true)
 setInterval(function() {
     let last = document.getElementById('subscribe').lastChild;
     if (isAnyPartOfElementInViewport(last))
-    {
+    {     
         let data = {
-            type: 'load-more-messages',
-            currentMinId: minMsgId
+            type: 'get-messages',
+            range: [minMsgId-30, minMsgId],
+            limit: 30
         }
         socket.send(JSON.stringify(data));
     }
