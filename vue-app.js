@@ -1,24 +1,16 @@
 var app = new Vue({
     el: '#subscribe',
     data: {
-      messages: [],
-      messageHTML: [],
+      messages: {},
       replyList: []
     },
     methods: {
         addMessage : function(msg)
         {
-            let index = 0;
-            while (index < this.messages.length && msg.id < this.messages[index].id) ++index;
-            if (this.messages[index] && this.messages[index].id == msg.id)
-            {
-                console.log("Attempted to add a duplicate message! ID: ", msg.id, "Keeping old!");
-                return false;
-            }
-
-            this.messages.splice(index,0,msg);
+            this.messages[msg.id] = {};
+            this.messages[msg.id].object = msg;
             this.renderMessagePromise(msg).then( function(s) {
-                app.messageHTML.splice(index,0,s);
+                app.messages[msg.id].html = s;
             })
             return true;
         },
@@ -68,9 +60,7 @@ var app = new Vue({
 
         getMessageById : function(id) //returns message object by ID if it is present in array or undefined if it is not.
         {
-            let searchResult = this.messages.find(el => { return el.id == id});
-            if (searchResult) return searchResult;
-            else return undefined;
+            return this.messages[id];
         },
 
         getMessageByIdPromise : function(id) //returns a promise containing a message object by ID. Will try to get a message from database if it is not present in array
