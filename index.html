@@ -20,8 +20,8 @@
     <a>Ключ шифрования:</a>
     <textarea name="key" id="key-area"></textarea>
     <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
-    <button id="delete-key-button" onclick="removeKeyFromLocalStorage()">Удалить ключ из LocalStorage</button>
-    <button id="apply-key-button" onclick="decryptMessages()">Расшифровать сообщения</button>
+    <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
+    <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
 
     <a>Сообщение:</a>
     <textarea name="message" id="message-area"></textarea>
@@ -32,12 +32,9 @@
   <!-- здесь будут появляться входящие сообщения -->
   <div id="subscribe">
     <div id="reply-list-div" v-if="this.replyList.length" v-html="'В этом сообщении вы отвечаете на: ' + this.replyList.join(', ')"></div>
-    <!--<div v-for="msg in messageHTML" class="message" v-html="msg"></div>-->
     <div v-for="item in messageList" v-html="item.html"></div>
   </div>
 
-  
-  <!--<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>-->
   <script src="https://unpkg.com/vue@next"></script>
   <script src="vue-app.js"></script>
   <script src="cryptojs/aes.js"></script>
