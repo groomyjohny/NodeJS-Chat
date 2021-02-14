@@ -11,17 +11,14 @@ async function main()
     // подключенные клиенты
     let clients = {};
 
-    const dbname = `localhost`;
-    const dbuser = `root`;
-    const dbdatabase = `chat`;
-    const dbpassword = ``;
+    sqlConnectionData = {
+        host: `localhost`,
+        user: `root`,
+        database: `chat`,
+        password: ``
+    }
 
-    const sqlConnection = await mysql.createConnection({
-        host: dbname,
-        user: dbuser,
-        database: dbdatabase,
-        password: dbpassword
-    }); 
+    const sqlConnection = await mysql.createConnection(sqlConnectionData); 
 
     const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
     function sendToAll(message)
@@ -55,27 +52,33 @@ async function main()
         ws.on('message', async (message) => {
             try
             {
+                const newSqlConnection = await mysql.createConnection(sqlConnectionData);
                 console.log(`Получено сообщение: ${message}`);
                 const arr = JSON.parse(message);                
 
                 if (arr.type == 'chat-message')
                 {
                     if (arr.replyList) arr.replyList.sort();
+
+                    await newSqlConnection.query("START TRANSACTION");
                     const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-                    let insertResult = await sqlConnection.query(query, [arr.nick, arr.message])
+                    let insertResult = await newSqlConnection.query(query, [arr.nick, arr.message])
 
                     arr.id = insertResult[0].insertId;
                     if (arr.replyList.length)
                     {
                         let replyValuesArr = [];
                         arr.replyList.forEach(el => { replyValuesArr.push([arr.id, el]);});
-                        sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
+                        newSqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
                     }
+                    await newSqlConnection.query("COMMIT");
 
-                    let datetimeResult = await sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
+                    let datetimeResult = await newSqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
                     arr.datetime = datetimeResult[0][0].datetime;
+                    newSqlConnection.end();
                     sendToAll(JSON.stringify(arr));
                 }        
+
                 else if (arr.type == "get-messages")
                 {
                     let queryBase = 'SELECT id, datetime, nick, message FROM messages WHERE ';
