@@ -44,9 +44,8 @@ document.forms.publish.addEventListener("submit", function (event) {
     socket.send(msg);
 });
 
-function decryptMessages(event)
+function decryptMessages()
 {
-    //event.preventDefault();
     for (i in app.messages)
     {
         if (app.messages[i].object.encrypted)

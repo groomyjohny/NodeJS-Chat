@@ -65,6 +65,10 @@ form input, button {
     display: inline-block;
     margin-right: 5px;
 }
+.message-nick, .message-text {
+    word-wrap: break-word;
+    max-width: 100%;
+}
 #nick-area {
     height: 80px;
 }
