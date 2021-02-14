@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Фев 10 2021 г., 06:07
+-- Время создания: Фев 14 2021 г., 18:20
 -- Версия сервера: 10.4.17-MariaDB
 -- Версия PHP: 8.0.2
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- База данных: `chat`
 --
-CREATE DATABASE IF NOT EXISTS `chat` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `chat`;
 
 -- --------------------------------------------------------
 
@@ -29,13 +27,12 @@ USE `chat`;
 -- Структура таблицы `messages`
 --
 
-CREATE TABLE IF NOT EXISTS `messages` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `messages` (
+  `id` bigint(20) NOT NULL,
   `datetime` datetime DEFAULT current_timestamp(),
   `nick` mediumtext DEFAULT NULL,
-  `salt` varchar(1024) DEFAULT NULL,
   `message` mediumtext DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  `encrypted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -44,14 +41,45 @@ CREATE TABLE IF NOT EXISTS `messages` (
 -- Структура таблицы `replies`
 --
 
-CREATE TABLE IF NOT EXISTS `replies` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `replies` (
+  `id` bigint(20) NOT NULL,
   `parentId` bigint(20) DEFAULT NULL,
-  `childId` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `parentId` (`parentId`),
-  KEY `childId` (`childId`)
+  `childId` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Индексы сохранённых таблиц
+--
+
+--
+-- Индексы таблицы `messages`
+--
+ALTER TABLE `messages`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Индексы таблицы `replies`
+--
+ALTER TABLE `replies`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `parentId` (`parentId`),
+  ADD KEY `childId` (`childId`);
+
+--
+-- AUTO_INCREMENT для сохранённых таблиц
+--
+
+--
+-- AUTO_INCREMENT для таблицы `messages`
+--
+ALTER TABLE `messages`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT для таблицы `replies`
+--
+ALTER TABLE `replies`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц
