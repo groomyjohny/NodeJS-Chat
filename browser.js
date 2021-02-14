@@ -30,10 +30,10 @@ document.forms.publish.addEventListener("submit", function (event) {
 
         cipherNick = cipherNick.toString();
         cipherMessage = cipherMessage.toString();
-        encryped = true;
+        encrypted = true;
     }
 
-    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encryped: encryped };
+    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encrypted: encrypted };
     app.clearReplyList();
 
     localStorage.setItem('savedNick',this.nick.value);
