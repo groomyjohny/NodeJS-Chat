@@ -12,6 +12,18 @@ const Chat = {
             this.renderMessagePromise(this.messages[msg.id]).then( (s) => { app.messages[msg.id].html = s; })
             return true;
         },
+        
+        decryptMessage : function(id, key)
+        {
+            let msg = this.messages[id];
+
+            let nick = CryptoJS.AES.decrypt(msg.object.nick, key).toString(CryptoJS.enc.Utf8);
+            let text = CryptoJS.AES.decrypt(msg.object.message, key).toString(CryptoJS.enc.Utf8);
+            msg.object.nick = nick;
+            msg.object.message = text;
+            msg.object.encrypted = false;
+            this.addMessage(msg.object);
+        },
 
         addToReplyList : function(id)
         {
@@ -52,7 +64,6 @@ const Chat = {
             }
             s += `<div class="message-text">${msg.object.message}</div>
             <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
-            if (!msg.object.message) debugger;
             return s;
         },
 

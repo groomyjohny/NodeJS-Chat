@@ -25,7 +25,7 @@ form textarea {
 textarea {
     text-align: left;
 }
-form input { 
+form input, button { 
     align-self: center;
     background-color: inherit;
     border: 2px solid black;
@@ -33,7 +33,7 @@ form input {
     font-weight: 500; 
     font-size: 15px;
 }
-#message-submit-button:hover {
+#message-submit-button:hover, button:hover {
     background-color: rgb(0,0,0);
     color: white;
     transition: 0.18s;

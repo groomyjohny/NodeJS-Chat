@@ -16,6 +16,13 @@
   <form name="publish">
     <a>Ник:</a>
     <textarea name="nick" id="nick-area"></textarea>
+
+    <a>Ключ шифрования:</a>
+    <textarea name="key" id="key-area"></textarea>
+    <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
+    <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
+    <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
+
     <a>Сообщение:</a>
     <textarea name="message" id="message-area"></textarea>
     <input type="submit" value="Отправить" id="message-submit-button" />
@@ -25,15 +32,29 @@
   <!-- здесь будут появляться входящие сообщения -->
   <div id="subscribe">
     <div id="reply-list-div" v-if="this.replyList.length" v-html="'В этом сообщении вы отвечаете на: ' + this.replyList.join(', ')"></div>
-    <!--<div v-for="msg in messageHTML" class="message" v-html="msg"></div>-->
     <div v-for="item in messageList" v-html="item.html"></div>
   </div>
 
-  
-  <!--<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>-->
   <script src="https://unpkg.com/vue@next"></script>
   <script src="vue-app.js"></script>
+  <script src="cryptojs/aes.js"></script>
   <script src="browser.js"></script>
+
+  <script>
+    let saveKeyCheckbox = document.getElementById("save-key-checkbox");
+    saveKeyCheckbox.addEventListener("click", warnAboutKeyStorage);
+    function warnAboutKeyStorage(event)
+    {
+      if (!saveKeyCheckbox.checked) return; //do NOT remove exclamation mark.    
+      let result = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в явном (plaintext) виде. Это создаёт угрозу компрометации ключа и всех зашифрованных с его помощью сообщений. Рекомендуется хранить ключ в зашифрованном виде самостоятельно.\n\nВне зависимости от этого пункта, ваш ключ НЕ БУДЕТ отправлен на сервер. Продолжить?");
+      saveKeyCheckbox.checked = result;
+    }
+
+    function removeKeyFromLocalStorage()
+    {
+      if (confirm("Вы действительно хотите удалить сохранённый ключ?\n\nВНИМАНИЕ: если ключ будет утерян, то зашифрованные им сообщения расшифровать будет невозможно. После подтверждения ключ будет удалён из LocalStorage, но останется в поле для ввода.")) localStorage.removeItem('savedKey');
+    }
+  </script>
 </body>
 
 </html>

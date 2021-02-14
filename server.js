@@ -61,8 +61,8 @@ async function main()
                     if (arr.replyList) arr.replyList.sort();
 
                     await newSqlConnection.query("START TRANSACTION");
-                    const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-                    let insertResult = await newSqlConnection.query(query, [arr.nick, arr.message])
+                    const query = "INSERT INTO messages (nick, message, encrypted) VALUES (?,?,?)";
+                    let insertResult = await newSqlConnection.query(query, [arr.nick, arr.message, arr.encrypted]);
 
                     arr.id = insertResult[0].insertId;
                     if (arr.replyList.length)
@@ -81,7 +81,7 @@ async function main()
 
                 else if (arr.type == "get-messages")
                 {
-                    let queryBase = 'SELECT id, datetime, nick, message FROM messages WHERE ';
+                    let queryBase = 'SELECT id, datetime, nick, message, encrypted FROM messages WHERE ';
                     let queryFilter = '';
                     let queryParams;
                     if (arr.range) //get messages with id in range, limit is optional

@@ -3,6 +3,9 @@ if (localStorage.savedNick)
 else
     localStorage.setItem('savedNick','');
 
+if (localStorage.savedKey)
+    document.forms.publish.key.value = localStorage.savedKey
+
 if (!window.WebSocket) {
     document.body.innerHTML = 'WebSocket в этом браузере не поддерживается.';
 }
@@ -15,17 +18,43 @@ var socket = new WebSocket(sockPath)
 // отправить сообщение из формы publish
 document.forms.publish.addEventListener("submit", function (event) {
     event.preventDefault();    
-    var outgoingMessage = this.message.value;
-    let data = { type: 'chat-message', nick: this.nick.value, message: outgoingMessage, replyList: app.getReplyList() };
+    let key = this.key.value;
+    let cipherMessage = this.message.value;
+    let cipherNick = this.nick.value;
+    let encrypted = false;
+
+    if (key && key != '')
+    {
+        cipherNick = CryptoJS.AES.encrypt(cipherNick, key);
+        cipherMessage = CryptoJS.AES.encrypt(cipherMessage, key);
+
+        cipherNick = cipherNick.toString();
+        cipherMessage = cipherMessage.toString();
+        encrypted = true;
+    }
+
+    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encrypted: encrypted };
     app.clearReplyList();
 
-    localStorage.setItem('savedNick',data.nick);
+    localStorage.setItem('savedNick',this.nick.value);
     let msg = JSON.stringify(data);
     document.getElementById("message-area").value = '';
+    if (document.getElementById("save-key-checkbox").checked) localStorage.savedKey = this.key.value;
 
     socket.send(msg);
 });
 
+function decryptMessages(event)
+{
+    //event.preventDefault();
+    for (i in app.messages)
+    {
+        if (app.messages[i].object.encrypted)
+        {
+            app.decryptMessage(app.messages[i].object.id, document.forms.publish.key.value);
+        }
+    }
+}
 let msgIdList;
 let msgIdListIndexLow = 0;
 let msgIdListIndexHigh;
@@ -44,6 +73,7 @@ socket.onmessage = function (event) {
         sendGetOlderMessagesRequest();
     }
 };
+
 
 function isAnyPartOfElementInViewport(el) {
     if (!el) return;
