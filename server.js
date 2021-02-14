@@ -52,12 +52,12 @@ async function main()
         ws.on('message', async (message) => {
             try
             {
-                const newSqlConnection = await mysql.createConnection(sqlConnectionData);
                 console.log(`Получено сообщение: ${message}`);
                 const arr = JSON.parse(message);                
 
                 if (arr.type == 'chat-message')
                 {
+                    const newSqlConnection = await mysql.createConnection(sqlConnectionData);
                     if (arr.replyList) arr.replyList.sort();
 
                     await newSqlConnection.query("START TRANSACTION");
