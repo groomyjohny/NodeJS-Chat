@@ -4,6 +4,7 @@
     "dependencies": {
         "mysql2": "^2.2.5",
         "node-static": "^0.7.11",
+        "uuidv4": "^6.2.6",
         "ws": "^7.4.2"
     }
 }
