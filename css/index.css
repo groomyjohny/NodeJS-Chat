@@ -43,6 +43,9 @@ form input, button {
     margin-left:10px;
 }
 
+.message {
+    margin-bottom: 7px;
+}
 .message-reply-spacer {
     margin-right: 2px;
     display: inline-block;
