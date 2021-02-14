@@ -21,6 +21,7 @@ document.forms.publish.addEventListener("submit", function (event) {
     let key = this.key.value;
     let cipherMessage = this.message.value;
     let cipherNick = this.nick.value;
+    let encrypted = false;
 
     if (key && key != '')
     {
@@ -29,9 +30,10 @@ document.forms.publish.addEventListener("submit", function (event) {
 
         cipherNick = cipherNick.toString();
         cipherMessage = cipherMessage.toString();
+        encryped = true;
     }
 
-    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList() };
+    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encryped: encryped };
     app.clearReplyList();
 
     localStorage.setItem('savedNick',this.nick.value);
@@ -60,6 +62,7 @@ socket.onmessage = function (event) {
         sendGetOlderMessagesRequest();
     }
 };
+
 
 function isAnyPartOfElementInViewport(el) {
     if (!el) return;
