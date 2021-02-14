@@ -80,6 +80,16 @@ const Chat = {
                 }, 500);
             });
         }
+    },
+
+    computed: {
+        messageList : function()
+        {
+            let a = [];
+            for (i in this.messages) a.push(this.messages[i]);
+            a.sort((a,b) => {return b.object.id - a.object.id});
+            return a;
+        }
     }
 }
 

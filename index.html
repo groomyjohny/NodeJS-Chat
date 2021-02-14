@@ -26,7 +26,7 @@
   <div id="subscribe">
     <div id="reply-list-div" v-if="this.replyList.length" v-html="'В этом сообщении вы отвечаете на: ' + this.replyList.join(', ')"></div>
     <!--<div v-for="msg in messageHTML" class="message" v-html="msg"></div>-->
-    <div v-for="item in messages" v-html="item.html"></div>
+    <div v-for="item in messageList" v-html="item.html"></div>
   </div>
 
   
