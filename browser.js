@@ -16,7 +16,9 @@ var socket = new WebSocket(sockPath)
 document.forms.publish.addEventListener("submit", function (event) {
     event.preventDefault();    
     var outgoingMessage = this.message.value;
-    let data = { type: 'chat-message', nick: this.nick.value, message: outgoingMessage };
+    let data = { type: 'chat-message', nick: this.nick.value, message: outgoingMessage, replyList: app.getReplyList() };
+    app.clearReplyList();
+
     localStorage.setItem('savedNick',data.nick);
     let msg = JSON.stringify(data);
     document.getElementById("message-area").value = '';
@@ -24,19 +26,22 @@ document.forms.publish.addEventListener("submit", function (event) {
     socket.send(msg);
 });
 
-let minMsgId = undefined;
+let msgIdList;
+let msgIdListIndexLow = 0;
+let msgIdListIndexHigh;
+
+socket.onopen = function (event) {}
 // обработчик входящих сообщений
 socket.onmessage = function (event) {
     var incomingMessage = event.data;
     let data = JSON.parse(incomingMessage);
 
-    if (!minMsgId) minMsgId = data.id;
-    else minMsgId = Math.min(data.id,minMsgId);
-
     if (data.type == 'chat-message') showMessage(data);
-    else if (data.type =='old-messages') 
+    if (data.type == 'msg-id-list') 
     {
-        showMessage(data,false);
+        msgIdList = data.idList;
+        msgIdListIndexHigh = msgIdList.length;
+        sendGetOlderMessagesRequest();
     }
 };
 
@@ -51,20 +56,26 @@ function isAnyPartOfElementInViewport(el) {
     return (vertInView && horInView);
 }
 // показать сообщение в div#subscribe
-function showMessage(data, appendToFront = true) 
+function showMessage(data) 
 {
-    app.addMessage(data, appendToFront);
+    app.addMessage(data);
 }
 
+function sendGetOlderMessagesRequest()
+{
+    let lowerBoundIndex = Math.max(msgIdListIndexHigh-30,0);
+    let data = {
+        type: 'get-messages',
+        range: [msgIdList[lowerBoundIndex], msgIdList[msgIdListIndexHigh-1]],
+    }
+    msgIdListIndexHigh = lowerBoundIndex;
+    socket.send(JSON.stringify(data));
+}
 //Обработчик "бесконечного" скроллинга
 setInterval(function() {
     let last = document.getElementById('subscribe').lastChild;
     if (isAnyPartOfElementInViewport(last))
-    {
-        let data = {
-            type: 'load-more-messages',
-            currentMinId: minMsgId
-        }
-        socket.send(JSON.stringify(data));
+    {     
+        sendGetOlderMessagesRequest();
     }
 }, 200);

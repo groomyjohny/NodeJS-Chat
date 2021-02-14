@@ -1,110 +1,144 @@
 const WebSocketServer = new require('ws');
 const Static = require('node-static');
 const { Socket } = require('dgram');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const http = require('http');
 
-const ports = [8080, 8081];
-
-// подключенные клиенты
-let clients = {};
-
-const dbname = `localhost`;
-const dbuser = `root`;
-const dbdatabase = `chat`;
-const dbpassword = ``;
-
-const sqlConnection = mysql.createConnection({
-    host: dbname,
-    user: dbuser,
-    database: dbdatabase,
-    password: dbpassword
-}); 
-
-// WebSocket-сервер на порту 8081
-const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
-function sendToAll(message)
+async function main() 
 {
-    for (let key in clients) 
-        clients[key].send(message);
+    const ports = [8080, 8081];
+
+    // подключенные клиенты
+    let clients = {};
+
+    sqlConnectionData = {
+        host: `localhost`,
+        user: `root`,
+        database: `chat`,
+        password: ``
+    }
+
+    const sqlConnection = await mysql.createConnection(sqlConnectionData); 
+
+    const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
+    function sendToAll(message)
+    {
+        for (let key in clients) 
+            clients[key].send(message);
+    }
+
+    webSocketServer.on('connection', async (ws) => {
+        let id = Math.random();
+
+        clients[id] = ws;
+        console.log(`Hовое соединение: id = ${id}`);
+
+        const query = "SELECT id FROM messages";
+        try
+        {
+            let result = await sqlConnection.query(query);
+            let msgIdList = [];
+            result[0].forEach(el => {
+                msgIdList.push(el.id);
+            })
+            let data = { type: "msg-id-list", idList: msgIdList };
+            ws.send(JSON.stringify(data));
+        }
+        catch (err)
+        {
+            console.log(err);
+        }
+
+        ws.on('message', async (message) => {
+            try
+            {
+                const newSqlConnection = await mysql.createConnection(sqlConnectionData);
+                console.log(`Получено сообщение: ${message}`);
+                const arr = JSON.parse(message);                
+
+                if (arr.type == 'chat-message')
+                {
+                    if (arr.replyList) arr.replyList.sort();
+
+                    await newSqlConnection.query("START TRANSACTION");
+                    const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
+                    let insertResult = await newSqlConnection.query(query, [arr.nick, arr.message])
+
+                    arr.id = insertResult[0].insertId;
+                    if (arr.replyList.length)
+                    {
+                        let replyValuesArr = [];
+                        arr.replyList.forEach(el => { replyValuesArr.push([arr.id, el]);});
+                        newSqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
+                    }
+                    await newSqlConnection.query("COMMIT");
+
+                    let datetimeResult = await newSqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
+                    arr.datetime = datetimeResult[0][0].datetime;
+                    newSqlConnection.end();
+                    sendToAll(JSON.stringify(arr));
+                }        
+
+                else if (arr.type == "get-messages")
+                {
+                    let queryBase = 'SELECT id, datetime, nick, message FROM messages WHERE ';
+                    let queryFilter = '';
+                    let queryParams;
+                    if (arr.range) //get messages with id in range, limit is optional
+                    {
+                        queryFilter = "id BETWEEN ? AND ?";
+                        queryParams = [ arr.range[0] ? arr.range[0] : 0, arr.range[1] ? arr.range[1] : 18446744073709551615n];
+                        if (arr.limit)
+                        {
+                            queryFilter += " LIMIT ?";
+                            queryParams.push(arr.limit); 
+                        }                        
+                    }
+                    else if (arr.id) //get single message with specific id
+                    {
+                        queryFilter = "id = ?";
+                        queryParams = [arr.id];
+                    }
+                    
+                    let selectResults = await sqlConnection.query(queryBase+queryFilter,queryParams);
+                    selectResults[0].forEach(async el =>
+                    {
+                        let data = el;
+                        data.type = 'chat-message';
+                        let replyListSelectResults = await sqlConnection.query("SELECT childId FROM replies WHERE parentId = ?",[el.id]);
+                        data.replyList = [];
+                        replyListSelectResults[0].forEach(el => { data.replyList.push(el.childId) });
+                        ws.send(JSON.stringify(data));
+                    });
+                }
+            }
+            catch (err)
+            {
+                console.error(err);
+            }
+        });
+
+        ws.on('close', () => {
+            console.log(`Cоединение закрыто: ${id}`);
+            delete clients[id];
+        });
+    });
+
+    // обычный сервер (статика) на порту 8080
+    const fileServer = new Static.Server('.');
+
+    http.createServer( (req, res) => { 
+        fileServer.serve(req, res); 
+    }).listen(ports[0]);
+
+    console.log(`Сервер запущен на портах ${ports[0]}, ${ports[1]}`);
 }
 
-webSocketServer.on('connection', (ws) => {
-    let id = Math.random();
-
-    clients[id] = ws;
-    console.log(`Hовое соединение: id = ${id}`);
-
-    const limit = 30;
-    const subquery = `SELECT AUTO_INCREMENT
-    FROM  INFORMATION_SCHEMA.TABLES
-    WHERE TABLE_SCHEMA = 'chat'
-    AND   TABLE_NAME   = 'messages'`;
-    const query = "SELECT id, datetime, nick, message FROM messages WHERE id > " + "( "+subquery+")-?" ;
-
-    sqlConnection.query(query, [limit], (err, result, fields) => {
-        if (err) 
-            return console.error(err);
-        else
-            for (i in result)
-            {
-                let data = result[i];
-                data.type = 'chat-message';
-                sendToAll(JSON.stringify(data));
-            }
-    });
-
-    ws.on('message', (message) => {
-        console.log(`Получено сообщение: ${message}`);
-        const arr = JSON.parse(message);
-
-        if (arr.type == 'chat-message')
-        {
-            const query = "INSERT INTO messages (nick, message) VALUES (?,?)" 
-            // UNION (SELECT LAST_INSERT_ID() AS selId FROM messages) UNION (SELECT datetime AS selDatetime FROM messages WHERE id=selId)
-            sqlConnection.query(query, [arr.nick, arr.message], (err,result,fields) => {
-                arr.id = result.insertId;
-                sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id], (err2,result2,fields2) => {
-                    if (err2)
-                        console.error(err2);
-                    else
-                    {
-                        arr.datetime = result2[0].datetime;
-                        sendToAll(JSON.stringify(arr));
-                    }
-                })
-            });            
-        }
-        else if (arr.type == "load-more-messages")
-        {
-            let newQuery = "SELECT id, datetime, nick, message FROM messages WHERE id BETWEEN ? AND ? ORDER BY id DESC";
-            sqlConnection.query(newQuery, [arr.currentMinId - limit, arr.currentMinId-1], (err, result, fields) => {
-                if (err) 
-                    return console.error(err);
-                else
-                {
-                    for (i in result)
-                    {
-                        let data = result[i];
-                        data.type = 'old-messages';
-                        ws.send(JSON.stringify(data));
-                    }
-                }
-            });
-        }
-    });
-
-    ws.on('close', () => {
-        console.log(`Cоединение закрыто: ${id}`);
-        delete clients[id];
-    });
-});
-
-// обычный сервер (статика) на порту 8080
-const fileServer = new Static.Server('.');
-
-http.createServer( (req, res) => { 
-    fileServer.serve(req, res); 
-}).listen(ports[0]);
-
-console.log(`Сервер запущен на портах ${ports[0]}, ${ports[1]}`);
+try
+{
+    main();
+}
+catch (err)
+{
+    console.error(err);
+}
