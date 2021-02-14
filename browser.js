@@ -44,6 +44,17 @@ document.forms.publish.addEventListener("submit", function (event) {
     socket.send(msg);
 });
 
+function decryptMessages(event)
+{
+    //event.preventDefault();
+    for (i in app.messages)
+    {
+        if (app.messages[i].object.encrypted)
+        {
+            app.decryptMessage(app.messages[i].object.id, document.forms.publish.key.value);
+        }
+    }
+}
 let msgIdList;
 let msgIdListIndexLow = 0;
 let msgIdListIndexHigh;
