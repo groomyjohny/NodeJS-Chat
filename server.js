@@ -61,8 +61,8 @@ async function main()
                     if (arr.replyList) arr.replyList.sort();
 
                     await newSqlConnection.query("START TRANSACTION");
-                    const query = "INSERT INTO messages (nick, message) VALUES (?,?)";
-                    let insertResult = await newSqlConnection.query(query, [arr.nick, arr.message])
+                    const query = "INSERT INTO messages (nick, message, salt) VALUES (?,?,?)";
+                    let insertResult = await newSqlConnection.query(query, [arr.nick, arr.message, arr.salt]);
 
                     arr.id = insertResult[0].insertId;
                     if (arr.replyList.length)

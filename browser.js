@@ -18,14 +18,29 @@ var socket = new WebSocket(sockPath)
 // отправить сообщение из формы publish
 document.forms.publish.addEventListener("submit", function (event) {
     event.preventDefault();    
-    var outgoingMessage = this.message.value;
-    let data = { type: 'chat-message', nick: this.nick.value, message: outgoingMessage, replyList: app.getReplyList() };
+    let key = this.key.value;
+    let cipherMessage = this.message.value;
+    let cipherNick = this.nick.value;
+    let cipherSalt = null;
+
+    if (key && key != '')
+    {
+        cipherSalt = CryptoJS.enc.Hex.stringify(CryptoJS.lib.WordArray.random(16));
+        cipherNick = CryptoJS.AES.encrypt(cipherNick, key, {iv: cipherSalt});
+        cipherMessage = CryptoJS.AES.encrypt(cipherMessage, key, {iv: cipherSalt});
+
+        cipherSalt = cipherSalt;
+        cipherNick = cipherNick.ciphertext.toString();
+        cipherMessage = cipherMessage.ciphertext.toString();
+    }
+
+    let data = { type: 'chat-message', salt: cipherSalt, nick: cipherNick, message: cipherMessage, replyList: app.getReplyList() };
     app.clearReplyList();
 
     localStorage.setItem('savedNick',data.nick);
     let msg = JSON.stringify(data);
     document.getElementById("message-area").value = '';
-    if (document.getElementById("save-key-checkbox").checked) localStorage.savedKey = document.forms.publish.key.value;
+    if (document.getElementById("save-key-checkbox").checked) localStorage.savedKey = this.key.value;
 
     socket.send(msg);
 });
