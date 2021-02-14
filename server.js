@@ -3,7 +3,7 @@ const Static = require('node-static');
 const { Socket } = require('dgram');
 const mysql = require('mysql2/promise');
 const http = require('http');
-
+const { uuid } = require('uuidv4');
 async function main() 
 {
     const ports = [8080, 8081];
@@ -28,14 +28,14 @@ async function main()
     }
 
     webSocketServer.on('connection', async (ws) => {
-        let id = Math.random();
+        let id = uuid();
 
         clients[id] = ws;
         console.log(`Hовое соединение: id = ${id}`);
 
-        const query = "SELECT id FROM messages";
         try
         {
+            const query = "SELECT id FROM messages";
             let result = await sqlConnection.query(query);
             let msgIdList = [];
             result[0].forEach(el => {

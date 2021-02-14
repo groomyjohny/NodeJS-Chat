@@ -44,7 +44,7 @@
     saveKeyCheckbox.addEventListener("click", warnAboutKeyStorage);
     function warnAboutKeyStorage(event)
     {
-      if (!saveKeyCheckbox.checked) return;      
+      if (!saveKeyCheckbox.checked) return; //do NOT remove exclamation mark.    
       let result = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в явном (plaintext) виде. Это создаёт угрозу компрометации ключа и всех зашифрованных с его помощью сообщений. Рекомендуется хранить ключ в зашифрованном виде самостоятельно.\n\nВне зависимости от этого пункта, ваш ключ НЕ БУДЕТ отправлен на сервер. Продолжить?");
       saveKeyCheckbox.checked = result;
     }
