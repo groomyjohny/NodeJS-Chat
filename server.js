@@ -11,7 +11,7 @@ async function main()
     // подключенные клиенты
     let clients = {};
 
-    sqlConnectionData = {
+    const sqlConnectionData = {
         host: `localhost`,
         user: `root`,
         database: `chat`,
