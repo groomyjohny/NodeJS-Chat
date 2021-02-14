@@ -39,7 +39,7 @@ document.forms.publish.addEventListener("submit", function (event) {
     let data = { type: 'chat-message', salt: cipherSalt, encryptedSalt: encryptedSalt, nick: cipherNick, message: cipherMessage, replyList: app.getReplyList() };
     app.clearReplyList();
 
-    localStorage.setItem('savedNick',data.nick);
+    localStorage.setItem('savedNick',this.nick.value);
     let msg = JSON.stringify(data);
     document.getElementById("message-area").value = '';
     if (document.getElementById("save-key-checkbox").checked) localStorage.savedKey = this.key.value;
