@@ -22,19 +22,21 @@ document.forms.publish.addEventListener("submit", function (event) {
     let cipherMessage = this.message.value;
     let cipherNick = this.nick.value;
     let cipherSalt = null;
+    let encryptedSalt = cipherSalt;
 
     if (key && key != '')
     {
         cipherSalt = CryptoJS.enc.Hex.stringify(CryptoJS.lib.WordArray.random(16));
         cipherNick = CryptoJS.AES.encrypt(cipherNick, key, {iv: cipherSalt});
         cipherMessage = CryptoJS.AES.encrypt(cipherMessage, key, {iv: cipherSalt});
+        encryptedSalt = CryptoJS.AES.encrypt(cipherSalt, key, {iv: cipherSalt});
 
-        cipherSalt = cipherSalt;
+        encryptedSalt = encryptedSalt.ciphertext.toString();
         cipherNick = cipherNick.ciphertext.toString();
         cipherMessage = cipherMessage.ciphertext.toString();
     }
 
-    let data = { type: 'chat-message', salt: cipherSalt, nick: cipherNick, message: cipherMessage, replyList: app.getReplyList() };
+    let data = { type: 'chat-message', salt: cipherSalt, encryptedSalt: encryptedSalt, nick: cipherNick, message: cipherMessage, replyList: app.getReplyList() };
     app.clearReplyList();
 
     localStorage.setItem('savedNick',data.nick);
