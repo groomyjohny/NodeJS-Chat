@@ -1,25 +1,15 @@
-var app = new Vue({
-    el: '#subscribe',
-    data: {
-      messages: [],
-      messageHTML: [],
-      replyList: []
-    },
+const Chat = {
+    data : () => (
+    {
+        messages: {},
+        replyList: []
+    }),
     methods: {
         addMessage : function(msg)
         {
-            let index = 0;
-            while (index < this.messages.length && msg.id < this.messages[index].id) ++index;
-            if (this.messages[index] && this.messages[index].id == msg.id)
-            {
-                console.log("Attempted to add a duplicate message! ID: ", msg.id, "Keeping old!");
-                return false;
-            }
-
-            this.messages.splice(index,0,msg);
-            this.renderMessagePromise(msg).then( function(s) {
-                app.messageHTML.splice(index,0,s);
-            })
+            this.messages[msg.id] = {};
+            this.messages[msg.id].object = msg;
+            this.renderMessagePromise(this.messages[msg.id]).then( (s) => { app.messages[msg.id].html = s; })
             return true;
         },
 
@@ -48,35 +38,33 @@ var app = new Vue({
             for (let i = 0; i < offset; ++i) s += '<div class="message-reply-spacer"></div>';
             if (!msg) return s + "Ошибка: renderMessagePromise вызвано с msg == "+msg;
 
-            s += `<div class="message-id">${msg.id}</div>
-            <div class="message-datetime">${msg.datetime}</div>
-            <div class="message-nick">${msg.nick}</div>`;
-            if (msg.replyList)
+            s += `<div class="message-id">${msg.object.id}</div>
+            <div class="message-datetime">${msg.object.datetime}</div>
+            <div class="message-nick">${msg.object.nick}</div>`;
+            if (msg.object.replyList)
             {
-                //await msg.replyList.forEach(async element => {
-                for (let i = 0; i < msg.replyList.length; ++i)
+                for (let i = 0; i < msg.object.replyList.length; ++i)
                 {
-                    let element = msg.replyList[i];
+                    let element = msg.object.replyList[i];
                     let msgObject = await this.getMessageByIdPromise(element);
                     s += '<div class="message-reply">' + await this.renderMessagePromise(msgObject,offset + 1) + "</div>";
                 }
             }
-            s += `<div class="message-text">${msg.message}</div>
-            <a class="message-reply-link" onclick="app.addToReplyList(${msg.id})">Ответить</a>`;
+            s += `<div class="message-text">${msg.object.message}</div>
+            <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
+            if (!msg.object.message) debugger;
             return s;
         },
 
         getMessageById : function(id) //returns message object by ID if it is present in array or undefined if it is not.
         {
-            let searchResult = this.messages.find(el => { return el.id == id});
-            if (searchResult) return searchResult;
-            else return undefined;
+            return this.messages[id];
         },
 
         getMessageByIdPromise : function(id) //returns a promise containing a message object by ID. Will try to get a message from database if it is not present in array
         {
-            let searchResult = this.getMessageById(id);
-            if (searchResult) return new Promise((resolve) => resolve(searchResult));
+            let searchResult = this.getMessageById(id);           
+            if (searchResult) return searchResult;
             else return new Promise( (resolve, reject) => {
                 data = { type: "get-messages", id: id };
                 socket.send(JSON.stringify(data));
@@ -92,6 +80,17 @@ var app = new Vue({
                 }, 500);
             });
         }
-    }
-  })
+    },
 
+    computed: {
+        messageList : function()
+        {
+            let a = [];
+            for (i in this.messages) a.push(this.messages[i]);
+            a.sort((a,b) => {return b.object.id - a.object.id});
+            return a;
+        }
+    }
+}
+
+var app = Vue.createApp(Chat).mount('#subscribe');
