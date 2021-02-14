@@ -32,7 +32,7 @@
   <!-- здесь будут появляться входящие сообщения -->
   <div id="subscribe">
     <div id="reply-list-div" v-if="this.replyList.length" v-html="'В этом сообщении вы отвечаете на: ' + this.replyList.join(', ')"></div>
-    <div v-for="item in messageList" v-html="item.html"></div>
+    <div v-for="item in messageList" v-html="item.html" class="message"></div>
   </div>
 
   <script src="https://unpkg.com/vue@next"></script>
