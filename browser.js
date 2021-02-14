@@ -3,6 +3,9 @@ if (localStorage.savedNick)
 else
     localStorage.setItem('savedNick','');
 
+if (localStorage.savedKey)
+    document.forms.publish.key.value = localStorage.savedKey
+
 if (!window.WebSocket) {
     document.body.innerHTML = 'WebSocket в этом браузере не поддерживается.';
 }
@@ -22,6 +25,7 @@ document.forms.publish.addEventListener("submit", function (event) {
     localStorage.setItem('savedNick',data.nick);
     let msg = JSON.stringify(data);
     document.getElementById("message-area").value = '';
+    if (document.getElementById("save-key-checkbox").checked) localStorage.savedKey = document.forms.publish.key.value;
 
     socket.send(msg);
 });
