@@ -21,6 +21,7 @@
     <textarea name="key" id="key-area"></textarea>
     <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
     <button id="delete-key-button" onclick="removeKeyFromLocalStorage()">Удалить ключ из LocalStorage</button>
+    <button id="apply-key-button" onclick="decryptMessages()">Расшифровать сообщения</button>
 
     <a>Сообщение:</a>
     <textarea name="message" id="message-area"></textarea>
@@ -52,7 +53,7 @@
 
     function removeKeyFromLocalStorage()
     {
-      if (confirm("Вы действительно хотите удалить сохранённый ключ?\n\nВНИМАНИЕ: если ключ будет утерян, то зашифрованные им сообщения расшифрованть будет невозможно. После подтверждения ключ будет удалён из LocalStorage, но останется в поле для ввода.")) localStorage.removeItem('savedKey');
+      if (confirm("Вы действительно хотите удалить сохранённый ключ?\n\nВНИМАНИЕ: если ключ будет утерян, то зашифрованные им сообщения расшифровать будет невозможно. После подтверждения ключ будет удалён из LocalStorage, но останется в поле для ввода.")) localStorage.removeItem('savedKey');
     }
   </script>
 </body>
