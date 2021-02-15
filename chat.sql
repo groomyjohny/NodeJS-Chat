@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Фев 14 2021 г., 18:20
+-- Время создания: Фев 15 2021 г., 05:28
 -- Версия сервера: 10.4.17-MariaDB
 -- Версия PHP: 8.0.2
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- База данных: `chat`
 --
+CREATE DATABASE IF NOT EXISTS `chat` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE `chat`;
 
 -- --------------------------------------------------------
 
@@ -89,7 +91,7 @@ ALTER TABLE `replies`
 -- Ограничения внешнего ключа таблицы `replies`
 --
 ALTER TABLE `replies`
-  ADD CONSTRAINT `replies_ibfk_1` FOREIGN KEY (`parentId`) REFERENCES `messages` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `replies_ibfk_1` FOREIGN KEY (`parentId`) REFERENCES `messages` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `replies_ibfk_2` FOREIGN KEY (`childId`) REFERENCES `messages` (`id`) ON DELETE SET NULL;
 COMMIT;
 

@@ -5,7 +5,7 @@ const Chat = {
         replyList: []
     }),
     methods: {
-        addMessage : function(msg)
+        addMessage : function(msg) //add a message to the list. If a message with this ID is already present in the array, then it will be overwritten by the new one.
         {
             this.messages[msg.id] = {};
             this.messages[msg.id].object = msg;
@@ -39,6 +39,7 @@ const Chat = {
         {
             return this.replyList;    
         },
+
         clearReplyList : function () 
         {
             this.replyList = [];    
