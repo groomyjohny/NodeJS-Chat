@@ -18,9 +18,9 @@ async function main()
         password: ``
     }
 
-    const sqlConnection = await mysql.createConnection(sqlConnectionData); 
-
+    const sqlConnection = await mysql.createConnection(sqlConnectionData);
     const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
+    
     function sendToAll(message)
     {
         for (let key in clients) 
