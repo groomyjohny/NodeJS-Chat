@@ -2,59 +2,59 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="/css/index.css">
-  <title>Чат</title>
+    <meta charset="utf-8">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/index.css">
+    <title>Чат</title>
 </head>
 
 <body>
-  <!-- форма для отправки сообщений -->
-  <form name="publish">
-    <a>Ник:</a>
-    <textarea name="nick" id="nick-area" required></textarea>
+    <!-- форма для отправки сообщений -->
+    <form name="publish">
+        <a>Ник:</a>
+        <textarea name="nick" id="nick-area" required></textarea>
 
-    <a>Ключ шифрования:</a>
-    <textarea name="key" id="key-area"></textarea>
-    <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
-    <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
-    <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
+        <a>Ключ шифрования:</a>
+        <textarea name="key" id="key-area"></textarea>
+        <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
+        <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
+        <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
 
-    <a>Сообщение:</a>
-    <textarea name="message" id="message-area" required></textarea>
-    <input type="submit" value="Отправить" id="message-submit-button" />
-  </form>
+        <a>Сообщение:</a>
+        <textarea name="message" id="message-area" required></textarea>
+        <input type="submit" value="Отправить" id="message-submit-button" />
+    </form>
 
-  
-  <!-- здесь будут появляться входящие сообщения -->
-  <div id="subscribe">
-    <div id="reply-list-div" v-if="this.replyList.length" v-html="'В этом сообщении вы отвечаете на: ' + this.replyList.join(', ')"></div>
-    <div v-for="item in messageList" v-html="item.html" class="message"></div>
-  </div>
+    
+    <!-- здесь будут появляться входящие сообщения -->
+    <div id="subscribe">
+        <div id="reply-list-div" v-if="this.replyList.length" v-html="'В этом сообщении вы отвечаете на: ' + this.replyList.join(', ')"></div>
+        <div v-for="item in messageList" v-html="item.html" class="message"></div>
+    </div>
 
-  <script src="https://unpkg.com/vue@next"></script>
-  <script src="vue-app.js"></script>
-  <script src="cryptojs/aes.js"></script>
-  <script src="browser.js"></script>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="vue-app.js"></script>
+    <script src="cryptojs/aes.js"></script>
+    <script src="browser.js"></script>
 
-  <script>
-    let saveKeyCheckbox = document.getElementById("save-key-checkbox");
-    saveKeyCheckbox.addEventListener("click", warnAboutKeyStorage);
-    function warnAboutKeyStorage(event)
-    {
-      if (!saveKeyCheckbox.checked) return; //do NOT remove exclamation mark.    
-      let result = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в явном (plaintext) виде. Это создаёт угрозу компрометации ключа и всех зашифрованных с его помощью сообщений. Рекомендуется хранить ключ в зашифрованном виде самостоятельно.\n\nВне зависимости от этого пункта, ваш ключ НЕ БУДЕТ отправлен на сервер. Продолжить?");
-      saveKeyCheckbox.checked = result;
-    }
+    <script>
+        let saveKeyCheckbox = document.getElementById("save-key-checkbox");
+        saveKeyCheckbox.addEventListener("click", warnAboutKeyStorage);
+        function warnAboutKeyStorage(event)
+        {
+            if (!saveKeyCheckbox.checked) return; //do NOT remove exclamation mark.        
+            let result = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в явном (plaintext) виде. Это создаёт угрозу компрометации ключа и всех зашифрованных с его помощью сообщений. Рекомендуется хранить ключ в зашифрованном виде самостоятельно.\n\nВне зависимости от этого пункта, ваш ключ НЕ БУДЕТ отправлен на сервер. Продолжить?");
+            saveKeyCheckbox.checked = result;
+        }
 
-    function removeKeyFromLocalStorage()
-    {
-      if (confirm("Вы действительно хотите удалить сохранённый ключ?\n\nВНИМАНИЕ: если ключ будет утерян, то зашифрованные им сообщения расшифровать будет невозможно. После подтверждения ключ будет удалён из LocalStorage, но останется в поле для ввода. Если он у вас не сохранён где-либо ещё, обязательно сохраните его сразу после закрытия этого сообщения.")) localStorage.removeItem('savedKey');
-    }
-  </script>
+        function removeKeyFromLocalStorage()
+        {
+            if (confirm("Вы действительно хотите удалить сохранённый ключ?\n\nВНИМАНИЕ: если ключ будет утерян, то зашифрованные им сообщения расшифровать будет невозможно. После подтверждения ключ будет удалён из LocalStorage, но останется в поле для ввода. Если он у вас не сохранён где-либо ещё, обязательно сохраните его сразу после закрытия этого сообщения.")) localStorage.removeItem('savedKey');
+        }
+    </script>
 </body>
 
 </html>
