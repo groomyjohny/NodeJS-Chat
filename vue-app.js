@@ -15,14 +15,23 @@ const Chat = {
         
         decryptMessage : function(id, key)
         {
-            let msg = this.messages[id];
+            let msg;
+            try
+            {
+                msg = this.messages[id];
 
-            let nick = CryptoJS.AES.decrypt(msg.object.nick, key).toString(CryptoJS.enc.Utf8);
-            let text = CryptoJS.AES.decrypt(msg.object.message, key).toString(CryptoJS.enc.Utf8);
-            msg.object.nick = nick;
-            msg.object.message = text;
-            msg.object.encrypted = false;
-            this.addMessage(msg.object);
+                let nick = CryptoJS.AES.decrypt(msg.object.nick, key).toString(CryptoJS.enc.Utf8);
+                let text = CryptoJS.AES.decrypt(msg.object.message, key).toString(CryptoJS.enc.Utf8);
+                msg.object.nick = nick;
+                msg.object.message = text;
+                msg.object.encrypted = false;
+                this.addMessage(msg.object);
+            }
+            catch (err)
+            {
+                console.error("Error while decrypting message: ",err);
+                if (msg) msg.object.encrypted = true;          
+            }
         },
 
         addToReplyList : function(id)
