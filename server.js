@@ -4,6 +4,8 @@ const { Socket } = require('dgram');
 const mysql = require('mysql2/promise');
 const http = require('http');
 const { uuid } = require('uuidv4');
+
+require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 async function main() 
 {
     const ports = [8080, 8081];
