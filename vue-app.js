@@ -11,7 +11,7 @@ const Chat = {
             if (!this.messages[msgObject.id]) this.messages[msgObject.id] = {};            
             this.messages[msgObject.id].object = msgObject;
             if (msgObject.replyList) msgObject.replyList.forEach(el => {
-                this.dependants[el] = this.dependants.el || [];
+                this.dependants[el] = this.dependants[el] || [];
                 this.dependants[el].push(msgObject.id);
             });
             this.redrawMessage(msgObject.id);
@@ -49,7 +49,10 @@ const Chat = {
         redrawMessage : function(id)
         {
             let msg = this.getMessageById(id);
-            this.renderMessagePromise(msg).then( (s) => { app.messages[id].html = s; })
+            this.renderMessagePromise(msg).then( (s) => { 
+                app.messages[id].html = s;
+                if (app.dependants[id]) app.dependants[id].forEach(dId => app.redrawMessage(dId));
+            });
         },
 
         addToReplyList : function(id)
