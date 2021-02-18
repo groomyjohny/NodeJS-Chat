@@ -88,7 +88,8 @@ function isAnyPartOfElementInViewport(el) {
 function showMessage(data) 
 {
     app.addMessage(data);
-    if (data.encrypted) app.decryptMessage(data.id, document.forms.publish.key.value);
+    let key = document.forms.publish.key.value;
+    if (data.encrypted && key != '') app.decryptMessage(data.id, key);
 }
 
 function sendGetOlderMessagesRequest()
