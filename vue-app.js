@@ -60,9 +60,11 @@ const Chat = {
             for (let i = 0; i < offset; ++i) s += '<div class="message-reply-spacer"></div>';
             if (!msg) return s + "Ошибка: renderMessagePromise вызвано с msg == "+msg;
 
+            let messageText = msg.object.encrypted ? "Это сообщение зашифровано." : msg.object.message;
+            let messageNick = msg.object.encrypted ? '' : msg.object.nick;
             s += `<div class="message-id">${msg.object.id}</div>
-            <div class="message-datetime">${msg.object.datetime}</div>
-            <div class="message-nick">${msg.object.nick}</div>`;
+            <div class="message-datetime">${msg.object.datetime}</div>            
+            <div class="message-nick">${messageNick}</div>`;
             if (msg.object.replyList)
             {
                 for (let i = 0; i < msg.object.replyList.length; ++i)
@@ -71,8 +73,8 @@ const Chat = {
                     let msgObject = await this.getMessageByIdPromise(element);
                     s += '<div class="message-reply">' + await this.renderMessagePromise(msgObject,offset + 1) + "</div>";
                 }
-            }
-            s += `<div class="message-text">${msg.object.message}</div>
+            }           
+            s += `<div class="message-text">${messageText}</div>
             <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
             return s;
         },
