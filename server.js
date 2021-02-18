@@ -9,10 +9,6 @@ require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 async function main() 
 {
     const ports = [8080, 8081];
-
-    // подключенные клиенты
-    let clients = {};
-
     const sqlConnectionData = {
         host: `localhost`,
         user: `root`,
@@ -20,8 +16,8 @@ async function main()
         password: ``
     }
 
-    const sqlConnection = await mysql.createConnection(sqlConnectionData);
     const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
+    let clients = {};    
     
     function sendToAll(message)
     {
@@ -37,8 +33,11 @@ async function main()
 
         try
         {
+            const sqlConnection = await mysql.createConnection(sqlConnectionData);
             const query = "SELECT id FROM messages";
             let result = await sqlConnection.query(query);
+            sqlConnection.end();
+
             let msgIdList = [];
             result[0].forEach(el => {
                 msgIdList.push(el.id);
@@ -59,30 +58,31 @@ async function main()
 
                 if (arr.type == 'chat-message')
                 {
-                    const newSqlConnection = await mysql.createConnection(sqlConnectionData);
+                    const sqlConnection = await mysql.createConnection(sqlConnectionData);
                     if (arr.replyList) arr.replyList.sort();
 
-                    await newSqlConnection.query("START TRANSACTION");
+                    await sqlConnection.query("START TRANSACTION");
                     const query = "INSERT INTO messages (nick, message, encrypted) VALUES (?,?,?)";
-                    let insertResult = await newSqlConnection.query(query, [arr.nick, arr.message, arr.encrypted]);
+                    let insertResult = await sqlConnection.query(query, [arr.nick, arr.message, arr.encrypted]);
 
                     arr.id = insertResult[0].insertId;
                     if (arr.replyList.length)
                     {
                         let replyValuesArr = [];
                         arr.replyList.forEach(el => { replyValuesArr.push([arr.id, el]);});
-                        newSqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
+                        sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
                     }
-                    await newSqlConnection.query("COMMIT");
+                    await sqlConnection.query("COMMIT");
 
-                    let datetimeResult = await newSqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
-                    arr.datetime = datetimeResult[0][0].datetime;
-                    newSqlConnection.end();
+                    let datetimeResult = await sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
+                    sqlConnection.end();
+                    arr.datetime = datetimeResult[0][0].datetime;                    
                     sendToAll(JSON.stringify(arr));
                 }        
 
                 else if (arr.type == "get-messages")
                 {
+                    const sqlConnection = await mysql.createConnection(sqlConnectionData);
                     let queryBase = 'SELECT id, datetime, nick, message, encrypted FROM messages WHERE ';
                     let queryFilter = '';
                     let queryParams;
@@ -112,6 +112,7 @@ async function main()
                         replyListSelectResults[0].forEach(el => { data.replyList.push(el.childId) });
                         ws.send(JSON.stringify(data));
                     });
+                    sqlConnection.end();
                 }
             }
             catch (err)
