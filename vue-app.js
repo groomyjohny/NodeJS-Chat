@@ -142,7 +142,9 @@ const Chat = {
         messageList : function()
         {
             let a = [];
-            for (i in this.messages) a.push(this.messages[i]);
+            for (i in this.messages) 
+                if (!this.messages[i].hidden)
+                    a.push(this.messages[i]);
             a.sort((a,b) => {return b.object.id - a.object.id});
             return a;
         }
