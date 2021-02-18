@@ -47,7 +47,7 @@ async function main()
         }
         catch (err)
         {
-            console.log(err);
+            console.error(err);
         }
 
         ws.on('message', async (message) => {
