@@ -9,7 +9,6 @@ const Chat = {
         {
             if (!this.messages[msgObject.id]) this.messages[msgObject.id] = {};            
             this.messages[msgObject.id].object = msgObject;
-            //this.renderMessagePromise(this.messages[msgObject.id]).then( (s) => { app.messages[msgObject.id].html = s; })
             this.redrawMessage(msgObject.id);
             return true;
         },
@@ -20,9 +19,10 @@ const Chat = {
             try
             {
                 msg = this.messages[id];
-
                 let nick = CryptoJS.AES.decrypt(msg.object.nick, key).toString(CryptoJS.enc.Utf8);
                 let text = CryptoJS.AES.decrypt(msg.object.message, key).toString(CryptoJS.enc.Utf8);
+                if (!nick || !text) throw new Error("Decryption failed: nick or message is empty");
+
                 msg.object.nick = nick;
                 msg.object.message = text;
                 msg.object.encrypted = false;
@@ -31,7 +31,7 @@ const Chat = {
             }
             catch (err)
             {
-                console.error("Error while decrypting message: ",err);
+                console.log("Error while decrypting message: ",err);
                 if (msg) 
                 {
                     this.messages[id].object.encrypted = true;          
