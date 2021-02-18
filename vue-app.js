@@ -108,7 +108,7 @@ const Chat = {
                 decryptStatusIcon = "decryption_not_attempted.png";
                 decryptStatusCaption = "Сообщение зашифровано, попыток расшифрования не осуществлялось.";
             }
-            s += `<img class="message-decrypt-status-icon" src="img/${decryptStatusIcon}" alt="${decryptStatusCaption}"></img>`;
+            s += `<img class="message-decrypt-status-icon" src="img/${decryptStatusIcon}" title="${decryptStatusCaption}"></img>`;
             return s;
         },
 
