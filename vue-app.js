@@ -2,6 +2,7 @@ const Chat = {
     data : () => (
     {
         messages: {},
+        dependants: {},
         replyList: []
     }),
     methods: {
@@ -9,7 +10,10 @@ const Chat = {
         {
             if (!this.messages[msgObject.id]) this.messages[msgObject.id] = {};            
             this.messages[msgObject.id].object = msgObject;
-            //this.renderMessagePromise(this.messages[msgObject.id]).then( (s) => { app.messages[msgObject.id].html = s; })
+            if (msgObject.replyList) msgObject.replyList.forEach(el => {
+                this.dependants[el] = this.dependants[el] || [];
+                this.dependants[el].push(msgObject.id);
+            });
             this.redrawMessage(msgObject.id);
             return true;
         },
@@ -20,9 +24,10 @@ const Chat = {
             try
             {
                 msg = this.messages[id];
-
                 let nick = CryptoJS.AES.decrypt(msg.object.nick, key).toString(CryptoJS.enc.Utf8);
                 let text = CryptoJS.AES.decrypt(msg.object.message, key).toString(CryptoJS.enc.Utf8);
+                if (!nick || !text) throw new Error("Decryption failed: nick or message is empty");
+
                 msg.object.nick = nick;
                 msg.object.message = text;
                 msg.object.encrypted = false;
@@ -31,7 +36,7 @@ const Chat = {
             }
             catch (err)
             {
-                console.error("Error while decrypting message: ",err);
+                console.log("Error while decrypting message: ",err);
                 if (msg) 
                 {
                     this.messages[id].object.encrypted = true;          
@@ -44,7 +49,10 @@ const Chat = {
         redrawMessage : function(id)
         {
             let msg = this.getMessageById(id);
-            this.renderMessagePromise(msg).then( (s) => { app.messages[id].html = s; })
+            this.renderMessagePromise(msg).then( (s) => { 
+                app.messages[id].html = s;
+                if (app.dependants[id]) app.dependants[id].forEach(dId => app.redrawMessage(dId));
+            });
         },
 
         addToReplyList : function(id)
@@ -86,7 +94,7 @@ const Chat = {
                     let msgObject = await this.getMessageByIdPromise(element);
                     s += '<div class="message-reply">' + await this.renderMessagePromise(msgObject,offset + 1) + "</div>";
                 }
-            }  
+            }
 
             s += `<div class="message-text">${messageText}</div>
             <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
@@ -108,7 +116,7 @@ const Chat = {
                 decryptStatusIcon = "decryption_not_attempted.png";
                 decryptStatusCaption = "Сообщение зашифровано, попыток расшифрования не осуществлялось.";
             }
-            s += `<img class="message-decrypt-status-icon" src="img/${decryptStatusIcon}" alt="${decryptStatusCaption}"></img>`;
+            s += `<img class="message-decrypt-status-icon" src="img/${decryptStatusIcon}" title="${decryptStatusCaption}"></img>`;
             return s;
         },
 
@@ -142,7 +150,9 @@ const Chat = {
         messageList : function()
         {
             let a = [];
-            for (i in this.messages) a.push(this.messages[i]);
+            for (i in this.messages) 
+                if (!this.messages[i].hidden)
+                    a.push(this.messages[i]);
             a.sort((a,b) => {return b.object.id - a.object.id});
             return a;
         }

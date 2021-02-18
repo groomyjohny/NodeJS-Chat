@@ -89,7 +89,7 @@ function showMessage(data)
 {
     app.addMessage(data);
     let key = document.forms.publish.key.value;
-    if (data.encrypted && key != '') app.decryptMessage(data.id, key);
+    if (data.encrypted && key && key != '') app.decryptMessage(data.id, key);
 }
 
 function sendGetOlderMessagesRequest()
