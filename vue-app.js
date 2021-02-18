@@ -93,7 +93,7 @@ const Chat = {
 
             let decryptStatusIcon;            
             let decryptStatusCaption;   
-            if (!msg.encrypted && !msg.decryptStatus) //message was not encrypted originally
+            if (!msg.object.encrypted && !msg.decryptStatus) //message was not encrypted originally
             {
                 decryptStatusIcon = 'message_not_encrypted.png';
                 decryptStatusCaption = "Это сообщение не шифровалось.";
@@ -105,8 +105,8 @@ const Chat = {
             }
             else //message was encrypted, but no decrypt attempts were made.
             {
-                decryptStatusIcon = "decrypt_not_attempted.png";
-                decryptStatusCaption = "Не совершалось попыток расшифрования.";
+                decryptStatusIcon = "decryption_not_attempted.png";
+                decryptStatusCaption = "Сообщение зашифровано, попыток расшифрования не осуществлялось.";
             }
             s += `<img class="message-decrypt-status-icon" src="img/${decryptStatusIcon}" alt="${decryptStatusCaption}"></img>`;
             return s;
