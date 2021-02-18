@@ -2,6 +2,7 @@ const Chat = {
     data : () => (
     {
         messages: {},
+        dependants: {},
         replyList: []
     }),
     methods: {
@@ -9,6 +10,10 @@ const Chat = {
         {
             if (!this.messages[msgObject.id]) this.messages[msgObject.id] = {};            
             this.messages[msgObject.id].object = msgObject;
+            if (msgObject.replyList) msgObject.replyList.forEach(el => {
+                this.dependants[el] = this.dependants.el || [];
+                this.dependants[el].push(msgObject.id);
+            });
             this.redrawMessage(msgObject.id);
             return true;
         },
@@ -86,7 +91,7 @@ const Chat = {
                     let msgObject = await this.getMessageByIdPromise(element);
                     s += '<div class="message-reply">' + await this.renderMessagePromise(msgObject,offset + 1) + "</div>";
                 }
-            }  
+            }
 
             s += `<div class="message-text">${messageText}</div>
             <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
