@@ -82,8 +82,11 @@ form button:hover {
 #message-area {
     height: 150px;
 }
-
 .message-reply-link {
     text-decoration: underline;
     cursor: pointer;
+}
+.message-decrypt-status-icon {
+    height: 16px;
+    margin-left: 5px;
 }
