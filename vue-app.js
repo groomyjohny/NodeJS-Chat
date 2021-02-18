@@ -5,11 +5,12 @@ const Chat = {
         replyList: []
     }),
     methods: {
-        addMessage : function(msg) //add a message to the list. If a message with this ID is already present in the array, then it will be overwritten by the new one.
+        addMessage : function(msgObject) //add a message to the list. If a message with this ID is already present in the array, then it will be overwritten by the new one.
         {
-            this.messages[msg.id] = {};
-            this.messages[msg.id].object = msg;
-            this.renderMessagePromise(this.messages[msg.id]).then( (s) => { app.messages[msg.id].html = s; })
+            if (!this.messages[msgObject.id]) this.messages[msgObject.id] = {};            
+            this.messages[msgObject.id].object = msgObject;
+            //this.renderMessagePromise(this.messages[msgObject.id]).then( (s) => { app.messages[msgObject.id].html = s; })
+            this.redrawMessage(msgObject.id);
             return true;
         },
         
@@ -25,13 +26,25 @@ const Chat = {
                 msg.object.nick = nick;
                 msg.object.message = text;
                 msg.object.encrypted = false;
+                msg.decryptStatus = 'success';
                 this.addMessage(msg.object);
             }
             catch (err)
             {
                 console.error("Error while decrypting message: ",err);
-                if (msg) msg.object.encrypted = true;          
+                if (msg) 
+                {
+                    this.messages[id].object.encrypted = true;          
+                    this.messages[id].decryptStatus = 'fail';
+                    this.redrawMessage(id);
+                }
             }
+        },
+
+        redrawMessage : function(id)
+        {
+            let msg = this.getMessageById(id);
+            this.renderMessagePromise(msg).then( (s) => { app.messages[id].html = s; })
         },
 
         addToReplyList : function(id)
@@ -73,9 +86,29 @@ const Chat = {
                     let msgObject = await this.getMessageByIdPromise(element);
                     s += '<div class="message-reply">' + await this.renderMessagePromise(msgObject,offset + 1) + "</div>";
                 }
-            }           
+            }  
+
             s += `<div class="message-text">${messageText}</div>
             <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
+
+            let decryptStatusIcon;            
+            let decryptStatusCaption;   
+            if (!msg.encrypted && !msg.decryptStatus) //message was not encrypted originally
+            {
+                decryptStatusIcon = 'message_not_encrypted.png';
+                decryptStatusCaption = "Это сообщение не шифровалось.";
+            } 
+            else if (msg.decryptStatus) //message was encrypted and attempt to decrypt was made
+            {                        
+                decryptStatusIcon = msg.decryptStatus == 'fail' ? "decryption_failed.png" : "decryption_succeeded.png";
+                decryptStatusCaption = msg.decryptStatus == 'fail' ? "Не удалось расшифровать сообщение введенным ключом." : "Сообщение расшифровано с помощью введенного ключа.";   
+            }
+            else //message was encrypted, but no decrypt attempts were made.
+            {
+                decryptStatusIcon = "decrypt_not_attempted.png";
+                decryptStatusCaption = "Не совершалось попыток расшифрования.";
+            }
+            s += `<img class="message-decrypt-status-icon" src="img/${decryptStatusIcon}" alt="${decryptStatusCaption}"></img>`;
             return s;
         },
 
