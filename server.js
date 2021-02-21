@@ -7,11 +7,22 @@ require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 const ports = [8080, 8081];
 const app = express();
 
-app.use(express.static('public'));
+app.get('/', (req,res)=>{
+    res.render("index.hbs", {roomId: null});
+})
+
+app.get('/room/:roomId', (req,res)=>{
+    let roomId = req.params.roomId;
+    res.render("index.hbs",{roomId: roomId});
+})
+
+app.use('/public',express.static('public'));
 
 app.listen(ports[0], (req,res) => {
     
 })
+
+
 
 async function main() 
 {    

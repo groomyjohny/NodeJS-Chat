@@ -99,24 +99,24 @@ const Chat = {
             s += `<div class="message-text">${messageText}</div>
             <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
 
-            let decryptStatusIcon;            
+            let decryptStatusIcon = "/public/img/";            
             let decryptStatusCaption;   
             if (!msg.object.encrypted && !msg.decryptStatus) //message was not encrypted originally
             {
-                decryptStatusIcon = 'message_not_encrypted.png';
+                decryptStatusIcon += 'message_not_encrypted.png';
                 decryptStatusCaption = "Это сообщение не шифровалось.";
             } 
             else if (msg.decryptStatus) //message was encrypted and attempt to decrypt was made
             {                        
-                decryptStatusIcon = msg.decryptStatus == 'fail' ? "decryption_failed.png" : "decryption_succeeded.png";
+                decryptStatusIcon += msg.decryptStatus == 'fail' ? "decryption_failed.png" : "decryption_succeeded.png";
                 decryptStatusCaption = msg.decryptStatus == 'fail' ? "Не удалось расшифровать сообщение введенным ключом." : "Сообщение расшифровано с помощью введенного ключа.";   
             }
             else //message was encrypted, but no decrypt attempts were made.
             {
-                decryptStatusIcon = "decryption_not_attempted.png";
+                decryptStatusIcon += "decryption_not_attempted.png";
                 decryptStatusCaption = "Сообщение зашифровано, попыток расшифрования не осуществлялось.";
             }
-            s += `<img class="message-decrypt-status-icon" src="img/${decryptStatusIcon}" title="${decryptStatusCaption}"></img>`;
+            s += `<img class="message-decrypt-status-icon" src="${decryptStatusIcon}" title="${decryptStatusCaption}"></img>`;
             return s;
         },
 
