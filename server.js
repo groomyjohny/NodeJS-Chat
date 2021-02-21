@@ -1,14 +1,20 @@
 const WebSocketServer = new require('ws');
-const Static = require('node-static');
-const { Socket } = require('dgram');
 const mysql = require('mysql2/promise');
-const http = require('http');
 const { uuid } = require('uuidv4');
-
+const express = require('express');
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
+
+const ports = [8080, 8081];
+const app = express();
+
+app.use(express.static('public'));
+
+app.listen(ports[0], (req,res) => {
+    
+})
+
 async function main() 
-{
-    const ports = [8080, 8081];
+{    
     const sqlConnectionData = {
         host: `localhost`,
         user: `root`,
@@ -126,14 +132,6 @@ async function main()
             delete clients[id];
         });
     });
-
-    // обычный сервер (статика) на порту 8080
-    const fileServer = new Static.Server('.');
-
-    http.createServer( (req, res) => { 
-        fileServer.serve(req, res); 
-    }).listen(ports[0]);
-
     console.log(`Сервер запущен на портах ${ports[0]}, ${ports[1]}`);
 }
 
