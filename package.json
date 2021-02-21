@@ -4,6 +4,7 @@
     "dependencies": {
         "console-stamp": "^0.2.9",
         "express": "^4.17.1",
+        "hbs": "^4.1.1",
         "mysql2": "^2.2.5",
         "uuidv4": "^6.2.6",
         "ws": "^7.4.2"

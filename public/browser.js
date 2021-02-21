@@ -21,6 +21,7 @@ document.forms.publish.addEventListener("submit", function (event) {
     let key = this.key.value;
     let cipherMessage = this.message.value;
     let cipherNick = this.nick.value;
+    let roomId = this.roomId.value;
     let encrypted = false;
 
     if (key && key != '')
@@ -33,7 +34,7 @@ document.forms.publish.addEventListener("submit", function (event) {
         encrypted = true;
     }
 
-    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encrypted: encrypted };
+    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encrypted: encrypted, roomId: roomId };
     app.clearReplyList();
 
     localStorage.setItem('savedNick',this.nick.value);
@@ -58,19 +59,22 @@ let msgIdList;
 let msgIdListIndexLow = 0;
 let msgIdListIndexHigh;
 
-socket.onopen = function (event) {}
+socket.onopen = function (event) {
+    let data = {
+        type: 'room-id',
+        roomId: document.forms.publish.roomId.value
+    }
+    socket.send(JSON.stringify(data));
+}
 // обработчик входящих сообщений
+
+
 socket.onmessage = function (event) {
     var incomingMessage = event.data;
     let data = JSON.parse(incomingMessage);
 
-    if (data.type == 'chat-message') showMessage(data);
-    if (data.type == 'msg-id-list') 
-    {
-        msgIdList = data.idList;
-        msgIdListIndexHigh = msgIdList.length;
-        sendGetOlderMessagesRequest();
-    }
+    if (data.type == 'chat-message') handleMessage(data);
+    else console.log("Incorrect message, parsed: ",data);
 };
 
 
@@ -85,22 +89,23 @@ function isAnyPartOfElementInViewport(el) {
     return (vertInView && horInView);
 }
 // показать сообщение в div#subscribe
-function showMessage(data) 
+let oldMessageUpperBound = undefined;
+function handleMessage(data) 
 {
     app.addMessage(data);
+    if (data.isOld) 
+        oldMessageUpperBound = oldMessageUpperBound ? Math.min(oldMessageUpperBound,data.id) : data.id;
     let key = document.forms.publish.key.value;
     if (data.encrypted && key && key != '') app.decryptMessage(data.id, key);
 }
 
 function sendGetOlderMessagesRequest()
 {
-    let lowerBoundIndex = Math.max(msgIdListIndexHigh-30,0);
-    if (lowerBoundIndex == msgIdListIndexHigh) return;
     let data = {
         type: 'get-messages',
-        range: [msgIdList[lowerBoundIndex], msgIdList[msgIdListIndexHigh-1]],
+        range: [undefined, oldMessageUpperBound],
+        limit: 30
     }
-    msgIdListIndexHigh = lowerBoundIndex;
     socket.send(JSON.stringify(data));
 }
 //Обработчик "бесконечного" скроллинга

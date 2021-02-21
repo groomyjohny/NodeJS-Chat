@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Фев 21 2021 г., 18:07
+-- Время создания: Фев 21 2021 г., 21:35
 -- Версия сервера: 10.4.17-MariaDB
 -- Версия PHP: 8.0.2
 
@@ -33,7 +33,7 @@ CREATE TABLE `messages` (
   `nick` mediumtext DEFAULT NULL,
   `message` mediumtext DEFAULT NULL,
   `encrypted` tinyint(1) DEFAULT 0,
-  `room` varchar(256) DEFAULT NULL
+  `roomId` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
