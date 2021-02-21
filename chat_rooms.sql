@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Фев 21 2021 г., 14:50
+-- Время создания: Фев 21 2021 г., 18:07
 -- Версия сервера: 10.4.17-MariaDB
 -- Версия PHP: 8.0.2
 
@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `messages` (
   `id` bigint(20) NOT NULL,
-  `datetime` datetime DEFAULT current_timestamp(),
+  `datetime` timestamp(6) NOT NULL DEFAULT current_timestamp(6),
   `nick` mediumtext DEFAULT NULL,
   `message` mediumtext DEFAULT NULL,
   `encrypted` tinyint(1) DEFAULT 0,
