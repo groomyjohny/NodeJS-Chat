@@ -36,10 +36,11 @@ async function main()
     const webSocketServer = new WebSocketServer.Server({ port: ports[1] });
     let clients = {};    
     
-    function sendToAll(message)
+    function sendToAllInRoom(message, roomId = null)
     {
         for (let key in clients) 
-            clients[key].send(message);
+            if (clients[key].roomId == roomId)
+                clients[key].send(message);
     }
 
     webSocketServer.on('connection', async (ws) => {
@@ -73,13 +74,17 @@ async function main()
                 console.log(`Получено сообщение: ${message}`);
                 const arr = JSON.parse(message);                
 
-                if (arr.type == 'chat-message')
+                if (arr.type == "room-id")
+                {
+                    clients[id].roomId = arr.roomId;
+                }
+                else if (arr.type == 'chat-message')
                 {
                     const sqlConnection = await mysql.createConnection(sqlConnectionData);
                     if (arr.replyList) arr.replyList.sort();
 
                     await sqlConnection.query("START TRANSACTION");
-                    const query = "INSERT INTO messages (nick, message, encrypted, room) VALUES (?,?,?,?)";
+                    const query = "INSERT INTO messages (nick, message, encrypted, roomId) VALUES (?,?,?,?)";
                     let insertResult = await sqlConnection.query(query, [arr.nick, arr.message, arr.encrypted, arr.roomId]);
 
                     arr.id = insertResult[0].insertId;
@@ -94,7 +99,7 @@ async function main()
                     let datetimeResult = await sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
                     sqlConnection.end();
                     arr.datetime = datetimeResult[0][0].datetime;                    
-                    sendToAll(JSON.stringify(arr));
+                    sendToAllInRoom(JSON.stringify(arr), arr.roomId);
                 }        
 
                 else if (arr.type == "get-messages")

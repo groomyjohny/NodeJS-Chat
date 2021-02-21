@@ -59,7 +59,13 @@ let msgIdList;
 let msgIdListIndexLow = 0;
 let msgIdListIndexHigh;
 
-socket.onopen = function (event) {}
+socket.onopen = function (event) {
+    let data = {
+        type: 'room-id',
+        roomId: document.forms.publish.roomId.value
+    }
+    socket.send(JSON.stringify(data));
+}
 // обработчик входящих сообщений
 socket.onmessage = function (event) {
     var incomingMessage = event.data;
