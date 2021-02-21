@@ -21,6 +21,7 @@ document.forms.publish.addEventListener("submit", function (event) {
     let key = this.key.value;
     let cipherMessage = this.message.value;
     let cipherNick = this.nick.value;
+    let roomId = this.roomId.value;
     let encrypted = false;
 
     if (key && key != '')
@@ -33,7 +34,7 @@ document.forms.publish.addEventListener("submit", function (event) {
         encrypted = true;
     }
 
-    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encrypted: encrypted };
+    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encrypted: encrypted, roomId: roomId };
     app.clearReplyList();
 
     localStorage.setItem('savedNick',this.nick.value);
