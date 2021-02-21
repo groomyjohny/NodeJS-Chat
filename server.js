@@ -79,8 +79,8 @@ async function main()
                     if (arr.replyList) arr.replyList.sort();
 
                     await sqlConnection.query("START TRANSACTION");
-                    const query = "INSERT INTO messages (nick, message, encrypted) VALUES (?,?,?)";
-                    let insertResult = await sqlConnection.query(query, [arr.nick, arr.message, arr.encrypted]);
+                    const query = "INSERT INTO messages (nick, message, encrypted, room) VALUES (?,?,?,?)";
+                    let insertResult = await sqlConnection.query(query, [arr.nick, arr.message, arr.encrypted, arr.roomId]);
 
                     arr.id = insertResult[0].insertId;
                     if (arr.replyList.length)
