@@ -130,7 +130,7 @@ const Chat = {
             let searchResult = this.getMessageById(id);           
             if (searchResult) return searchResult;
             else return new Promise( (resolve, reject) => {
-                data = { type: "get-messages", id: id };
+                data = { type: "get-messages", range: [id,id] };
                 socket.send(JSON.stringify(data));
 
                 let result;

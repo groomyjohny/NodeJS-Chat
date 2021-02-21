@@ -48,26 +48,7 @@ async function main()
         let id = uuidv4();
 
         clients[id] = ws;
-        console.log(`Hовое соединение: id = ${id}`);
-
-        try
-        {
-            const sqlConnection = await mysql.createConnection(sqlConnectionData);
-            const query = "SELECT id FROM messages";
-            let result = await sqlConnection.query(query);
-            sqlConnection.end();
-
-            let msgIdList = [];
-            result[0].forEach(el => {
-                msgIdList.push(el.id);
-            })
-            let data = { type: "msg-id-list", idList: msgIdList };
-            ws.send(JSON.stringify(data));
-        }
-        catch (err)
-        {
-            console.error(err);
-        }
+        console.log(`Hовое соединение: id = ${id}`);        
 
         ws.on('message', async (message) => {
             try
@@ -107,39 +88,37 @@ async function main()
                 {
                     const sqlConnection = await mysql.createConnection(sqlConnectionData);
                     let queryBase = 'SELECT id, datetime, nick, message, encrypted FROM messages WHERE roomId';
-                    let queryFilter = '';
+
+                    let query = queryBase;
                     let queryParams = [];
+
                     if (clients[id].roomId)
                     {
                         queryParams.push(clients[id].roomId);
-                        queryBase += "=? ";
+                        query += "=? ";
                     }
-                    else
-                    {
-                        queryBase += " IS NULL ";
-                    }
+                    else query += " IS NULL ";
+        
                     if (arr.range) //get messages with id in range, limit is optional
                     {
-                        queryFilter = "AND id BETWEEN ? AND ?";
+                        query += "AND id BETWEEN ? AND ? ORDER BY id DESC ";
                         queryParams.push(arr.range[0] ? arr.range[0] : 0);
                         queryParams.push(arr.range[1] ? arr.range[1] : 18446744073709551615n);
+
                         if (arr.limit)
                         {
-                            queryFilter += " LIMIT ?";
-                            queryParams.push(arr.limit); 
-                        }                        
+                            query += " LIMIT ? ";
+                            queryParams.push(arr.limit);
+                        }
                     }
-                    else if (arr.id) //get single message with specific id
-                    {
-                        queryFilter = "AND id = ?";
-                        queryParams = [arr.id];
-                    }                    
+                    else query += "ORDER BY id DESC";
                     
-                    let selectResults = await sqlConnection.query(queryBase+queryFilter,queryParams);
+                    let selectResults = await sqlConnection.query(query,queryParams);
                     selectResults[0].forEach(async el =>
                     {
                         let data = el;
                         data.type = 'chat-message';
+                        data.isOld = arr.range && (!arr.range[0] || !arr.range[1] || (arr.range[1]-arr.range[0] > 0));
                         let replyListSelectResults = await sqlConnection.query("SELECT childId FROM replies WHERE parentId = ?",[el.id]);
                         data.replyList = [];
                         replyListSelectResults[0].forEach(el => { data.replyList.push(el.childId) });
