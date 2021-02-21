@@ -2,6 +2,7 @@ const WebSocketServer = new require('ws');
 const mysql = require('mysql2/promise');
 const { v4: uuidv4 } = require('uuid');
 const express = require('express');
+const { query } = require('express');
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 
 const ports = [8080, 8081];
@@ -105,13 +106,23 @@ async function main()
                 else if (arr.type == "get-messages")
                 {
                     const sqlConnection = await mysql.createConnection(sqlConnectionData);
-                    let queryBase = 'SELECT id, datetime, nick, message, encrypted FROM messages WHERE ';
+                    let queryBase = 'SELECT id, datetime, nick, message, encrypted FROM messages WHERE roomId';
                     let queryFilter = '';
-                    let queryParams;
+                    let queryParams = [];
+                    if (clients[id].roomId)
+                    {
+                        queryParams.push(clients[id].roomId);
+                        queryBase += "=? ";
+                    }
+                    else
+                    {
+                        queryBase += " IS NULL ";
+                    }
                     if (arr.range) //get messages with id in range, limit is optional
                     {
-                        queryFilter = "id BETWEEN ? AND ?";
-                        queryParams = [ arr.range[0] ? arr.range[0] : 0, arr.range[1] ? arr.range[1] : 18446744073709551615n];
+                        queryFilter = "AND id BETWEEN ? AND ?";
+                        queryParams.push(arr.range[0] ? arr.range[0] : 0);
+                        queryParams.push(arr.range[1] ? arr.range[1] : 18446744073709551615n);
                         if (arr.limit)
                         {
                             queryFilter += " LIMIT ?";
@@ -120,9 +131,9 @@ async function main()
                     }
                     else if (arr.id) //get single message with specific id
                     {
-                        queryFilter = "id = ?";
+                        queryFilter = "AND id = ?";
                         queryParams = [arr.id];
-                    }
+                    }                    
                     
                     let selectResults = await sqlConnection.query(queryBase+queryFilter,queryParams);
                     selectResults[0].forEach(async el =>
