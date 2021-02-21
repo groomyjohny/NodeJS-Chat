@@ -1,6 +1,6 @@
 const WebSocketServer = new require('ws');
 const mysql = require('mysql2/promise');
-const { uuid } = require('uuidv4');
+const { v4: uuidv4 } = require('uuid');
 const express = require('express');
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 
@@ -32,7 +32,7 @@ async function main()
     }
 
     webSocketServer.on('connection', async (ws) => {
-        let id = uuid();
+        let id = uuidv4();
 
         clients[id] = ws;
         console.log(`Hовое соединение: id = ${id}`);
