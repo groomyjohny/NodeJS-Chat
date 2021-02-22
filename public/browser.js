@@ -68,12 +68,13 @@ socket.onopen = function (event) {
 }
 // обработчик входящих сообщений
 
-
+let noMoreMessages = false;
 socket.onmessage = function (event) {
     var incomingMessage = event.data;
     let data = JSON.parse(incomingMessage);
 
     if (data.type == 'chat-message') handleMessage(data);
+    else if (data.type == 'no-more-messages') noMoreMessages = true;
     else console.log("Incorrect message, parsed: ",data);
 };
 
@@ -103,7 +104,7 @@ function sendGetOlderMessagesRequest()
 {
     let data = {
         type: 'get-messages',
-        range: [undefined, oldMessageUpperBound],
+        range: [undefined, oldMessageUpperBound-1],
         limit: 30
     }
     socket.send(JSON.stringify(data));
@@ -112,7 +113,7 @@ function sendGetOlderMessagesRequest()
 setInterval(function() {
     let lastArr = document.querySelectorAll('#subscribe, .message');
     let last = lastArr[lastArr.length-1];
-    if (isAnyPartOfElementInViewport(last))
+    if (!noMoreMessages && isAnyPartOfElementInViewport(last))
     {     
         sendGetOlderMessagesRequest();
     }

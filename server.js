@@ -114,6 +114,7 @@ async function main()
                     else query += "ORDER BY id DESC";
                     
                     let selectResults = await sqlConnection.query(query,queryParams);
+                    if (selectResults[0].length == 0) ws.send(JSON.stringify({type: 'no-more-messages'}));
                     selectResults[0].forEach(async el =>
                     {
                         let data = el;
