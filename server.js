@@ -139,7 +139,8 @@ async function main()
             delete clients[id];
         });
     });
-    console.log(`Сервер запущен на портах ${ports[0]}, ${ports[1]}`);
+    console.log(`Порт express-сервера: ${ports[0]}`);
+    console.log(`Порт WebSocket-сервера: ${ports[1]}`);
 }
 
 try
