@@ -66,7 +66,6 @@ socket.onopen = function (event) {
     }
     socket.send(JSON.stringify(data));
 }
-// обработчик входящих сообщений
 
 let noMoreMessages = false;
 socket.onmessage = function (event) {
@@ -78,7 +77,6 @@ socket.onmessage = function (event) {
     else console.log("Incorrect message, parsed: ",data);
 };
 
-
 function isAnyPartOfElementInViewport(el) {
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -89,7 +87,7 @@ function isAnyPartOfElementInViewport(el) {
     const horInView = (rect.left <= windowWidth) && ((rect.left + rect.width) >= 0);
     return (vertInView && horInView);
 }
-// показать сообщение в div#subscribe
+
 let oldMessageUpperBound = undefined;
 function handleMessage(data) 
 {
@@ -109,6 +107,7 @@ function sendGetOlderMessagesRequest()
     }
     socket.send(JSON.stringify(data));
 }
+
 //Обработчик "бесконечного" скроллинга
 setInterval(function() {
     let lastArr = document.querySelectorAll('#subscribe, .message');
