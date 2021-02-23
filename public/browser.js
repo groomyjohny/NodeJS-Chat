@@ -118,3 +118,5 @@ setInterval(function() {
         sendGetOlderMessagesRequest();
     }
 }, 200);
+
+setTimeout(()=>{ app.showEmptySubscribeFeedMessage = true},2000);

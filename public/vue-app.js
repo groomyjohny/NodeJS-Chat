@@ -3,7 +3,8 @@ const Chat = {
     {
         messages: {},
         dependants: {},
-        replyList: []
+        replyList: [],
+        showEmptySubscribeFeedMessage: false,
     }),
     methods: {
         addMessage : function(msgObject) //add a message to the list. If a message with this ID is already present in the array, then it will be overwritten by the new one.
@@ -100,7 +101,7 @@ const Chat = {
             <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
 
             let decryptStatusIcon = "/public/img/";            
-            let decryptStatusCaption;   
+            let decryptStatusCaption;
             if (!msg.object.encrypted && !msg.decryptStatus) //message was not encrypted originally
             {
                 decryptStatusIcon += 'message_not_encrypted.png';
