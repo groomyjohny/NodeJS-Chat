@@ -30,7 +30,7 @@ async function main()
     const sqlConnectionData = {
         host: `localhost`,
         user: `root`,
-        database: `chat_rooms`,
+        database: `chat_prod`,
         password: ``
     }
 
