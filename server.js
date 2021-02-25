@@ -23,8 +23,6 @@ app.listen(ports[0], (req,res) => {
     
 })
 
-
-
 async function main() 
 {    
     const sqlConnectionData = {
