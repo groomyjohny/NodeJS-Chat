@@ -50,14 +50,9 @@ form button:hover {
 .message {
     margin-bottom: 7px;
 }
-.message-reply-spacer {
-    margin-right: 2px;
-    display: inline-block;
-    width: 3px;
-    background-color: blue;
-}
 .message-reply {
     opacity: 0.7;
+    padding-left: 5px;
 }
 .message-nick {
     font-weight: bold;    

@@ -79,7 +79,6 @@ const Chat = {
         renderMessagePromise : async function(msg, offset = 0)
         {
             let s = '';
-            for (let i = 0; i < offset; ++i) s += '<div class="message-reply-spacer">&nbsp;</div>';
             if (!msg) return s + "Ошибка: renderMessagePromise вызвано с msg == "+msg;
 
             let messageText = msg.object.encrypted ? "Это сообщение зашифровано." : msg.object.message;
