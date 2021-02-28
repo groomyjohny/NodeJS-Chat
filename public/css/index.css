@@ -1,7 +1,6 @@
 * { 
     font-family: 'Roboto', sans-serif;
 }
-
 form {
     display: flex; 
     flex-direction: column;
@@ -13,6 +12,14 @@ form {
     padding-right: 10px;
     margin-bottom: 20px;
     box-sizing: border-box;
+}
+a {
+    text-decoration: underline;
+    cursor: pointer;
+}
+a:hover {
+    color: rgb(170,170,0);
+    transition: 0.1s;
 }
 form * { 
     margin-bottom: 10px; 
@@ -27,7 +34,6 @@ form textarea {
     height: 50px;
     text-align: left;
 }
-
 form button { 
     align-self: center;
     background-color: inherit;
@@ -35,24 +41,22 @@ form button {
     padding: 5px 15px;
     font-weight: 500; 
     font-size: 15px;
+    width: 100%;
 }
-
 form button:hover {
     background-color: rgb(0,0,0);
     color: white;
     transition: 0.1s;
 }
-
 #subscribe {
     margin-left:10px;
 }
-
 .message {
     margin-bottom: 7px;
 }
 .message-reply {
     opacity: 0.7;
-    padding-left: 5px;
+    padding-left: 10px;
 }
 .message-nick {
     font-weight: bold;    
@@ -76,10 +80,6 @@ form button:hover {
 }
 #message-area {
     height: 150px;
-}
-.message-reply-link {
-    text-decoration: underline;
-    cursor: pointer;
 }
 .message-decrypt-status-icon {
     height: 16px;

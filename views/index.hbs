@@ -13,16 +13,23 @@
     <!-- форма для отправки сообщений -->
     <form name="publish">
         <input type="hidden" name="roomId" value="{{roomId}}">
-        <a>Ник:</a>
+        <div>Ник:</div>
         <textarea name="nick" id="nick-area" required></textarea>
 
-        <a>Ключ шифрования:</a>
+        <div>Ключ шифрования:</div>
         <textarea name="key" id="key-area"></textarea>
-        <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
-        <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
-        <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
 
-        <a>Сообщение:</a>
+        <a onclick="toggleMenuVisibility()" id="menu-toggle-link">Показать меню</a>
+        <div id="menu" style="display: none;">
+            <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
+            <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
+            <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
+            <button id="decrypt-keys-button" onclick="decryptKeys()" type="button">Расшифровать ключи из LocalStorage</button>
+            <button id="set-password-button" onclick="setPassword()" type="button">Установить пароль</button>
+            <button id="remove-password-button" onclick="if (confirm('Вы точно хотите удалить сохраненный пароль?')) sessionStorage.passwordHash = ''" type="button">Удалить пароль</button>
+        </div>
+
+        <div>Сообщение:</div>
         <textarea name="message" id="message-area" required></textarea>
         <button type="submit" id="message-submit-button">Отправить</button>
     </form>
@@ -37,18 +44,85 @@
     <script src="https://unpkg.com/vue@next"></script>
     <script src="/public/vue-app.js"></script>
     <script src="/public/cryptojs/aes.js"></script>
+    <script src="/public/cryptojs/sha256.js"></script>
     <script src="/public/browser.js"></script>
 
     <script>
+        function toggleMenuVisibility()
+        {
+            let link = document.getElementById('menu-toggle-link');
+            let s = document.getElementById('menu').style;
+            if (s.display == 'none') 
+            {
+                s.display = 'block';
+                link.innerHTML = "Скрыть меню";
+            }
+            else 
+            {
+                s.display = 'none';
+                link.innerHTML = "Показать меню";
+            }
+        }
         let saveKeyCheckbox = document.getElementById("save-key-checkbox");
         saveKeyCheckbox.addEventListener("click", warnAboutKeyStorage);
         function warnAboutKeyStorage(event)
         {
+            let result = false;
             if (!saveKeyCheckbox.checked) return; //do NOT remove exclamation mark.        
-            let result = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в явном (plaintext) виде. Это создаёт угрозу компрометации ключа и всех зашифрованных с его помощью сообщений. Рекомендуется хранить ключ в зашифрованном виде самостоятельно.\n\nВне зависимости от этого пункта, ваш ключ НЕ БУДЕТ отправлен на сервер. Продолжить?");
+            let confirmResult = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в зашифрованном виде. Для его расшифровки будет нужен пароль, который будет запрошен позже и не будет сохраняться или отправляться на сервер. Внутри сессии хэш пароля будет сохранен в sessionStorage вашего браузера.\n\nПри утере пароля восстановить его будет невозможно! Для продолжения нажмите ОК.");
+            if (!confirmResult) return false;
+            if (!sessionStorage.passwordHash && confirmResult)
+            {                
+                result = setPassword();
+                if (result) decryptKeys();
+            }
+            else if (sessionStorage.passwordHash) result = true;
             saveKeyCheckbox.checked = result;
+            saveKeys();
         }
 
+        function setPassword()
+        {
+            let pass = prompt("Введите пароль, который будет использоваться для шифрования ключа").toString();
+            if (!pass) return false;
+            let conf = prompt("Введите пароль ещё раз").toString();
+            if (!conf) return false;
+            if (pass != conf) 
+            {
+                alert("Введенные пароли не совпадают.");
+                return false;
+            }
+            sessionStorage.passwordHash = CryptoJS.SHA256(pass).toString();
+            return true;
+        }
+
+        function decryptKeys()
+        {
+            try 
+            {
+                if (!localStorage.savedKey) alert("В localStorage нет ключей.");
+                if (!sessionStorage.passwordHash && !setPassword()) return;
+                document.forms.publish.key.value = CryptoJS.AES.decrypt(localStorage.savedKey, sessionStorage.passwordHash).toString(CryptoJS.enc.Utf8);
+            }
+            catch (err)
+            {
+                alert("Ошибка при расшифровке ключей: "+err);
+            }
+        }
+
+        function saveKeys()
+        {
+            try 
+            {
+                let key = document.forms.publish.key.value;
+                if (!sessionStorage.passwordHash || !key) return;
+                localStorage.savedKey = CryptoJS.AES.encrypt(key, sessionStorage.passwordHash);
+            }
+            catch (err)
+            {
+                console.error("Error saving key: ",err)
+            }
+        }
         function removeKeyFromLocalStorage()
         {
             if (confirm("Вы действительно хотите удалить сохранённый ключ?\n\nВНИМАНИЕ: если ключ будет утерян, то зашифрованные им сообщения расшифровать будет невозможно. После подтверждения ключ будет удалён из LocalStorage, но останется в поле для ввода. Если он у вас не сохранён где-либо ещё, обязательно сохраните его сразу после закрытия этого сообщения.")) localStorage.removeItem('savedKey');
