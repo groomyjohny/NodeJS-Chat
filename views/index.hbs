@@ -37,7 +37,7 @@
     <!-- здесь будут появляться входящие сообщения -->
     <div id="subscribe">
         <div id="subscribe-empty-reminder" v-if="!messageList.length && showEmptySubscribeFeedMessage">Здесь будут появляться новые сообщения. Пока что тут ничего нет.</div>
-        <div id="reply-list-div" v-if="this.replyList.length">В этом сообщении вы отвечаете на: { replyList.join(', ') } <a v-on:click="clearReplyList()" href="#">Отменить</a> </div>
+        <div id="reply-list-div" v-if="this.replyList.length">В этом сообщении вы отвечаете на: { replyList.join(', ') } <a v-on:click="clearReplyList()">Отменить</a> </div>
         <div v-for="item in messageList" v-html="item.html" class="message"></div>
     </div>
 
