@@ -83,7 +83,9 @@
         function setPassword()
         {
             let pass = CryptoJS.SHA256(prompt("Введите пароль, который будет использоваться для шифрования ключа")).toString();
+            if (!pass) return false;
             let conf = CryptoJS.SHA256(prompt("Введите пароль ещё раз")).toString();
+            if (!conf) return false;
             if (pass != conf) 
             {
                 alert("Введенные пароли не совпадают.");
@@ -99,12 +101,7 @@
             try 
             {
                 if (!localStorage.savedKey) alert("В localStorage нет ключей.");
-                if (!sessionStorage.passwordHash)
-                {
-                    let result = confirm("Пароль для шифрования ключей не установлен. Установить сейчас?");
-                    if (result)
-                        if (!setPassword()) return;
-                }
+                if (!sessionStorage.passwordHash && !setPassword()) return;
                 document.forms.publish.key.value = CryptoJS.AES.decrypt(localStorage.savedKey, sessionStorage.passwordHash).toString(CryptoJS.enc.Utf8);
             }
             catch (err)
@@ -119,7 +116,7 @@
             {
                 let key = document.forms.publish.key.value;
                 if (!sessionStorage.passwordHash || !key) return;
-                localStorage.savedKey = CryptoJS.AES.encrypt(key,sessionStorage.passwordHash);
+                localStorage.savedKey = CryptoJS.AES.encrypt(key, sessionStorage.passwordHash);
             }
             catch (err)
             {
