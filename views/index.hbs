@@ -83,16 +83,16 @@
 
         function setPassword()
         {
-            let pass = CryptoJS.SHA256(prompt("Введите пароль, который будет использоваться для шифрования ключа")).toString();
+            let pass = prompt("Введите пароль, который будет использоваться для шифрования ключа").toString();
             if (!pass) return false;
-            let conf = CryptoJS.SHA256(prompt("Введите пароль ещё раз")).toString();
+            let conf = prompt("Введите пароль ещё раз").toString();
             if (!conf) return false;
             if (pass != conf) 
             {
                 alert("Введенные пароли не совпадают.");
                 return false;
             }
-            sessionStorage.passwordHash = pass;
+            sessionStorage.passwordHash = CryptoJS.SHA256(pass).toString();
             alert("Пароль успешно установлен.");
             return true;
         }
