@@ -21,6 +21,7 @@
         <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
         <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
         <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
+        <button id="decrypt-keys-button" onclick="decryptKeys()" type="button">Расшифровать ключи из LocalStorage</button>
 
         <a>Сообщение:</a>
         <textarea name="message" id="message-area" required></textarea>
@@ -37,6 +38,7 @@
     <script src="https://unpkg.com/vue@next"></script>
     <script src="/public/vue-app.js"></script>
     <script src="/public/cryptojs/aes.js"></script>
+    <script src="/public/cryptojs/sha256.js"></script>
     <script src="/public/browser.js"></script>
 
     <script>
@@ -44,11 +46,32 @@
         saveKeyCheckbox.addEventListener("click", warnAboutKeyStorage);
         function warnAboutKeyStorage(event)
         {
+            let result = false;
             if (!saveKeyCheckbox.checked) return; //do NOT remove exclamation mark.        
-            let result = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в явном (plaintext) виде. Это создаёт угрозу компрометации ключа и всех зашифрованных с его помощью сообщений. Рекомендуется хранить ключ в зашифрованном виде самостоятельно.\n\nВне зависимости от этого пункта, ваш ключ НЕ БУДЕТ отправлен на сервер. Продолжить?");
+            let confirmResult = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в зашифрованном виде. Для его расшифровки будет запрошен пароль, который будет запрошен позже и не будет сохраняться или отправляться на сервер. Внутри сессии хэш пароля будет сохранен в sessionStorage вашего браузера.\n\nПри утере пароля восстановить его будет невозможно! Для продолжения нажмите ОК.");
+            if (confirmResult)
+            {
+                let pass = CryptoJS.SHA256(prompt("Введите пароль, который будет использоваться для шифрования ключа")).toString();
+                let conf = CryptoJS.SHA256(prompt("Введите пароль ещё раз")).toString();
+                if (pass != conf) return alert("Введенные пароли не совпадают.");
+                alert("Пароль успешно установлен.");
+                sessionStorage.passwordHash = pass;
+                result = true;
+                decryptKeys();
+            }
             saveKeyCheckbox.checked = result;
         }
 
+        function decryptKeys()
+        {
+            try {
+                document.forms.publish.key.value = CryptoJS.AES.decrypt(localStorage.savedKey, sessionStorage.passwordHash).toString(CryptoJS.enc.Utf8);
+            }
+            catch (err)
+            {
+                alert("Ошибка при расшифровке ключей: "+err);
+            }
+        }
         function removeKeyFromLocalStorage()
         {
             if (confirm("Вы действительно хотите удалить сохранённый ключ?\n\nВНИМАНИЕ: если ключ будет утерян, то зашифрованные им сообщения расшифровать будет невозможно. После подтверждения ключ будет удалён из LocalStorage, но останется в поле для ввода. Если он у вас не сохранён где-либо ещё, обязательно сохраните его сразу после закрытия этого сообщения.")) localStorage.removeItem('savedKey');
