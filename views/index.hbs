@@ -18,11 +18,15 @@
 
         <a>Ключ шифрования:</a>
         <textarea name="key" id="key-area"></textarea>
-        <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
-        <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
-        <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
-        <button id="decrypt-keys-button" onclick="decryptKeys()" type="button">Расшифровать ключи из LocalStorage</button>
-        <button id="set-password-button" onclick="setPassword()" type="button">Установить пароль</button>
+
+        <a onclick="toggleMenuVisibility()" id="menu-toggle-link">Показать меню</a>
+        <div id="menu" style="display: none;">
+            <label><input type="checkbox" id="save-key-checkbox">Сохранить ключ в LocalStorage</label>
+            <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
+            <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
+            <button id="decrypt-keys-button" onclick="decryptKeys()" type="button">Расшифровать ключи из LocalStorage</button>
+            <button id="set-password-button" onclick="setPassword()" type="button">Установить пароль</button>
+        </div>
 
         <a>Сообщение:</a>
         <textarea name="message" id="message-area" required></textarea>
@@ -43,6 +47,21 @@
     <script src="/public/browser.js"></script>
 
     <script>
+        function toggleMenuVisibility()
+        {
+            let link = document.getElementById('menu-toggle-link');
+            let s = document.getElementById('menu').style;
+            if (s.display == 'none') 
+            {
+                s.display = 'block';
+                link.innerHTML = "Скрыть меню";
+            }
+            else 
+            {
+                s.display = 'none';
+                link.innerHTML = "Показать меню";
+            }
+        }
         let saveKeyCheckbox = document.getElementById("save-key-checkbox");
         saveKeyCheckbox.addEventListener("click", warnAboutKeyStorage);
         function warnAboutKeyStorage(event)
