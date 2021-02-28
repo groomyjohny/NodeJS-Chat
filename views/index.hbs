@@ -13,10 +13,10 @@
     <!-- форма для отправки сообщений -->
     <form name="publish">
         <input type="hidden" name="roomId" value="{{roomId}}">
-        <a>Ник:</a>
+        <div>Ник:</div>
         <textarea name="nick" id="nick-area" required></textarea>
 
-        <a>Ключ шифрования:</a>
+        <div>Ключ шифрования:</div>
         <textarea name="key" id="key-area"></textarea>
 
         <a onclick="toggleMenuVisibility()" id="menu-toggle-link">Показать меню</a>
@@ -28,7 +28,7 @@
             <button id="set-password-button" onclick="setPassword()" type="button">Установить пароль</button>
         </div>
 
-        <a>Сообщение:</a>
+        <div>Сообщение:</div>
         <textarea name="message" id="message-area" required></textarea>
         <button type="submit" id="message-submit-button">Отправить</button>
     </form>
