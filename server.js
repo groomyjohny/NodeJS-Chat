@@ -68,7 +68,7 @@ async function main()
                     let insertResult = await sqlConnection.query(query, [arr.nick, arr.message, arr.encrypted, arr.roomId]);
 
                     arr.id = insertResult[0].insertId;
-                    if (arr.replyList.length)
+                    if (arr.replyList && arr.replyList.length)
                     {
                         let replyValuesArr = [];
                         arr.replyList.forEach(el => { replyValuesArr.push([arr.id, el]);});
