@@ -26,6 +26,7 @@
             <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
             <button id="decrypt-keys-button" onclick="decryptKeys()" type="button">Расшифровать ключи из LocalStorage</button>
             <button id="set-password-button" onclick="setPassword()" type="button">Установить пароль</button>
+            <button id="remove-password-button" onclick="if (confirm('Вы точно хотите удалить сохраненный пароль?')) sessionStorage.passwordHash = ''" type="button">Удалить пароль</button>
         </div>
 
         <div>Сообщение:</div>
