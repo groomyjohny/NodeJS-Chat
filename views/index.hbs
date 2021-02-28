@@ -22,6 +22,7 @@
         <button id="delete-key-button" onclick="removeKeyFromLocalStorage()" type="button">Удалить ключ из LocalStorage</button>
         <button id="apply-key-button" onclick="decryptMessages()" type="button">Расшифровать сообщения</button> <!--Do not remove type="button", it will cause message to be sent together with decryption!-->
         <button id="decrypt-keys-button" onclick="decryptKeys()" type="button">Расшифровать ключи из LocalStorage</button>
+        <button id="set-password-button" onclick="setPassword()" type="button">Установить пароль</button>
 
         <a>Сообщение:</a>
         <textarea name="message" id="message-area" required></textarea>
@@ -48,28 +49,62 @@
         {
             let result = false;
             if (!saveKeyCheckbox.checked) return; //do NOT remove exclamation mark.        
-            let confirmResult = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в зашифрованном виде. Для его расшифровки будет запрошен пароль, который будет запрошен позже и не будет сохраняться или отправляться на сервер. Внутри сессии хэш пароля будет сохранен в sessionStorage вашего браузера.\n\nПри утере пароля восстановить его будет невозможно! Для продолжения нажмите ОК.");
-            if (confirmResult)
-            {
-                let pass = CryptoJS.SHA256(prompt("Введите пароль, который будет использоваться для шифрования ключа")).toString();
-                let conf = CryptoJS.SHA256(prompt("Введите пароль ещё раз")).toString();
-                if (pass != conf) return alert("Введенные пароли не совпадают.");
-                alert("Пароль успешно установлен.");
-                sessionStorage.passwordHash = pass;
-                result = true;
-                decryptKeys();
+            let confirmResult = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в зашифрованном виде. Для его расшифровки будет нужен пароль, который будет запрошен позже и не будет сохраняться или отправляться на сервер. Внутри сессии хэш пароля будет сохранен в sessionStorage вашего браузера.\n\nПри утере пароля восстановить его будет невозможно! Для продолжения нажмите ОК.");
+            if (!confirmResult) return false;
+            if (!sessionStorage.passwordHash && confirmResult)
+            {                
+                result = setPassword();
+                if (result) decryptKeys();
             }
+            else if (sessionStorage.passwordHash) result = true;
             saveKeyCheckbox.checked = result;
+            saveKeys();
+        }
+
+        function setPassword()
+        {
+            let pass = CryptoJS.SHA256(prompt("Введите пароль, который будет использоваться для шифрования ключа")).toString();
+            let conf = CryptoJS.SHA256(prompt("Введите пароль ещё раз")).toString();
+            if (pass != conf) 
+            {
+                alert("Введенные пароли не совпадают.");
+                return false;
+            }
+            sessionStorage.passwordHash = pass;
+            alert("Пароль успешно установлен.");
+            return true;
         }
 
         function decryptKeys()
         {
-            try {
+            try 
+            {
+                if (!localStorage.savedKey) alert("В localStorage нет ключей.");
+                if (!sessionStorage.passwordHash)
+                {
+                    let result = confirm("Пароль для шифрования ключей не установлен. Установить сейчас?");
+                    if (result)
+                        if (!setPassword()) return;
+                }
                 document.forms.publish.key.value = CryptoJS.AES.decrypt(localStorage.savedKey, sessionStorage.passwordHash).toString(CryptoJS.enc.Utf8);
             }
             catch (err)
             {
                 alert("Ошибка при расшифровке ключей: "+err);
+            }
+        }
+
+        function saveKeys()
+        {
+            try 
+            {
+                let key = document.forms.publish.key.value;
+                if (!sessionStorage.passwordHash || !key) return;
+                localStorage.savedKey = CryptoJS.AES.encrypt(key,sessionStorage.passwordHash);
+            }
+            catch (err)
+            {
+                console.error("Error saving key: ",err)
             }
         }
         function removeKeyFromLocalStorage()
