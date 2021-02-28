@@ -156,7 +156,9 @@ const Chat = {
             a.sort((a,b) => {return b.object.id - a.object.id});
             return a;
         }
-    }
+    },
+
+    delimiters: ['{', '}']
 }
 
 var app = Vue.createApp(Chat).mount('#subscribe');
