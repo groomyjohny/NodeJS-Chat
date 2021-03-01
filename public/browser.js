@@ -37,9 +37,9 @@ document.forms.publish.addEventListener("submit", function (event) {
         let reader = new FileReader(f);
         reader.onload = (ev) => {
             console.log(reader.result);
-            let a = CryptoJS.AES.encrypt(arrayBufferToWordArray(reader.result),key);
+            let a = CryptoJS.AES.encrypt(arrayBufferToWordArray(reader.result), key);
             console.log(a);
-            let b = CryptoJS.AES.decrypt(a,key).toString()
+            let b = CryptoJS.AES.decrypt(a, key).toString()
             console.log(b);
         }
         reader.readAsArrayBuffer(f);
@@ -128,6 +128,86 @@ function sendGetOlderMessagesRequest()
         limit: 30
     }
     socket.send(JSON.stringify(data));
+}
+
+function toggleMenuVisibility()
+{
+    let link = document.getElementById('menu-toggle-link');
+    let s = document.getElementById('menu').style;
+    if (s.display == 'none') 
+    {
+        s.display = 'block';
+        link.innerHTML = "Скрыть меню";
+    }
+    else 
+    {
+        s.display = 'none';
+        link.innerHTML = "Показать меню";
+    }
+}
+let saveKeyCheckbox = document.getElementById("save-key-checkbox");
+saveKeyCheckbox.addEventListener("click", warnAboutKeyStorage);
+function warnAboutKeyStorage(event)
+{
+    let result = false;
+    if (!saveKeyCheckbox.checked) return; //do NOT remove exclamation mark.        
+    let confirmResult = confirm("При выборе этого пункта, введенный в поле ключ шифрования будет записываться в LocalStorage в зашифрованном виде. Для его расшифровки будет нужен пароль, который будет запрошен позже и не будет сохраняться или отправляться на сервер. Внутри сессии хэш пароля будет сохранен в sessionStorage вашего браузера.\n\nПри утере пароля восстановить его будет невозможно! Для продолжения нажмите ОК.");
+    if (!confirmResult) return false;
+    if (!sessionStorage.passwordHash && confirmResult)
+    {                
+        result = setPassword();
+        if (result) decryptKeys();
+    }
+    else if (sessionStorage.passwordHash) result = true;
+    saveKeyCheckbox.checked = result;
+    saveKeys();
+}
+
+function setPassword()
+{
+    let pass = prompt("Введите пароль, который будет использоваться для шифрования ключа").toString();
+    if (!pass) return false;
+    let conf = prompt("Введите пароль ещё раз").toString();
+    if (!conf) return false;
+    if (pass != conf) 
+    {
+        alert("Введенные пароли не совпадают.");
+        return false;
+    }
+    sessionStorage.passwordHash = CryptoJS.SHA256(pass).toString();
+    return true;
+}
+
+function decryptKeys()
+{
+    try 
+    {
+        if (!localStorage.savedKey) alert("В localStorage нет ключей.");
+        if (!sessionStorage.passwordHash && !setPassword()) return;
+        document.forms.publish.key.value = CryptoJS.AES.decrypt(localStorage.savedKey, sessionStorage.passwordHash).toString(CryptoJS.enc.Utf8);
+    }
+    catch (err)
+    {
+        alert("Ошибка при расшифровке ключей: "+err);
+    }
+}
+
+function saveKeys()
+{
+    try 
+    {
+        let key = document.forms.publish.key.value;
+        if (!sessionStorage.passwordHash || !key) return;
+        localStorage.savedKey = CryptoJS.AES.encrypt(key, sessionStorage.passwordHash);
+    }
+    catch (err)
+    {
+        console.error("Error saving key: ",err)
+    }
+}
+function removeKeyFromLocalStorage()
+{
+    if (confirm("Вы действительно хотите удалить сохранённый ключ?\n\nВНИМАНИЕ: если ключ будет утерян, то зашифрованные им сообщения расшифровать будет невозможно. После подтверждения ключ будет удалён из LocalStorage, но останется в поле для ввода. Если он у вас не сохранён где-либо ещё, обязательно сохраните его сразу после закрытия этого сообщения.")) localStorage.removeItem('savedKey');
 }
 
 //Обработчик "бесконечного" скроллинга
