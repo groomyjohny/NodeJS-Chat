@@ -12,6 +12,15 @@ let sockPath = "ws://"+location.hostname+":8081/";
 console.log(sockPath)
 var socket = new WebSocket(sockPath)
 
+function arrayBufferToWordArray(ab) {
+    var i8a = new Uint8Array(ab);
+    var a = [];
+    for (var i = 0; i < i8a.length; i += 4) {
+        a.push(i8a[i] << 24 | i8a[i + 1] << 16 | i8a[i + 2] << 8 | i8a[i + 3]);
+    }
+    return CryptoJS.lib.WordArray.create(a, i8a.length);
+}
+
 // отправить сообщение из формы publish
 document.forms.publish.addEventListener("submit", function (event) {
     event.preventDefault();    
@@ -20,6 +29,22 @@ document.forms.publish.addEventListener("submit", function (event) {
     let cipherNick = this.nick.value;
     let roomId = this.roomId.value;
     let encrypted = false;
+
+    let files = document.getElementById('files').files;
+    for (let i = 0; i < files.length; ++i)
+    {
+        let f = files[i];
+        let reader = new FileReader(f);
+        reader.onload = (ev) => {
+            console.log(reader.result);
+            let a = CryptoJS.AES.encrypt(arrayBufferToWordArray(reader.result),key);
+            console.log(a);
+            let b = CryptoJS.AES.decrypt(a,key).toString()
+            console.log(b);
+        }
+        reader.readAsArrayBuffer(f);
+        
+    }
 
     if (key && key != '')
     {
