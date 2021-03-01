@@ -42,8 +42,7 @@ document.forms.publish.addEventListener("submit", function (event) {
             let b = CryptoJS.AES.decrypt(a, key).toString()
             console.log(b);
         }
-        reader.readAsArrayBuffer(f);
-        
+        reader.readAsArrayBuffer(f);        
     }
 
     if (key && key != '')
@@ -185,6 +184,7 @@ function decryptKeys()
         if (!localStorage.savedKey) alert("В localStorage нет ключей.");
         if (!sessionStorage.passwordHash && !setPassword()) return;
         document.forms.publish.key.value = CryptoJS.AES.decrypt(localStorage.savedKey, sessionStorage.passwordHash).toString(CryptoJS.enc.Utf8);
+        decryptMessages();
     }
     catch (err)
     {
