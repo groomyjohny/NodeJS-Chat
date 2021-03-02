@@ -41,7 +41,7 @@ document.forms.publish.addEventListener("submit", function (event) {
             console.log(reader.result);
             if (key) content = CryptoJS.AES.encrypt(arrayBufferToWordArray(reader.result), key).toString();
             console.log(content);
-            fileContent.push(content);
+            fileContent.push({type: f.type, content: content});
             //let b = CryptoJS.AES.decrypt(a, key).toString()
             if (i >= files.length-1) finalizeAndSendMessage();   
         }
