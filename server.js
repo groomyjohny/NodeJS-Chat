@@ -74,6 +74,13 @@ async function main()
                         arr.replyList.forEach(el => { replyValuesArr.push([arr.id, el]);});
                         sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
                     }
+
+                    if (arr.attachmentList)
+                        arr.attachmentList.forEach(fileContent => {
+                            let bin = new Buffer.from(fileContent,"base64");
+                            let serverFileName = uuidv4();
+                            //let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName) VALUES (?,?)",[arr.id, serverFileName]);
+                        })
                     await sqlConnection.query("COMMIT");
 
                     let datetimeResult = await sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
