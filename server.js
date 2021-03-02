@@ -82,14 +82,15 @@ async function main()
                             let bin = new Buffer.from(fileObject.content,"base64");
                             let serverFileName = uuidv4();
                             fs.writeFileSync(__dirname + "/public/attachments/"+serverFileName,bin);
-                            let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName,type) VALUES (?,?,?)",[arr.id, serverFileName, fileObject.type]);
+                            let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName,type) VALUES (?,?,?)", [arr.id, serverFileName, fileObject.type]);
                             resendAttachmentList.push(attachmentInsertResult[0].id);
                         })
                     await sqlConnection.query("COMMIT");
 
                     let datetimeResult = await sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
                     sqlConnection.end();
-                    arr.datetime = datetimeResult[0][0].datetime;                    
+                    arr.datetime = datetimeResult[0][0].datetime;
+                    arr.attachments = resendAttachmentList;                    
                     sendToAllInRoom(JSON.stringify(arr), arr.roomId);
                 }        
 
