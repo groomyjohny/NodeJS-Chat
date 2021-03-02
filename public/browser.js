@@ -24,6 +24,7 @@ function arrayBufferToWordArray(ab) {
 // отправить сообщение из формы publish
 document.forms.publish.addEventListener("submit", function (event) {
     event.preventDefault();    
+    let form = this;
     let key = this.key.value;
     let cipherMessage = this.message.value;
     let cipherNick = this.nick.value;
@@ -31,39 +32,44 @@ document.forms.publish.addEventListener("submit", function (event) {
     let encrypted = false;
 
     let files = document.getElementById('files').files;
+    let fileContent = [];
     for (let i = 0; i < files.length; ++i)
     {
         let f = files[i];
         let reader = new FileReader(f);
         reader.onload = (ev) => {
             console.log(reader.result);
-            let a = CryptoJS.AES.encrypt(arrayBufferToWordArray(reader.result), key);
-            console.log(a);
-            let b = CryptoJS.AES.decrypt(a, key).toString()
-            console.log(b);
+            if (key) content = CryptoJS.AES.encrypt(arrayBufferToWordArray(reader.result), key).toString();
+            console.log(content);
+            fileContent.push(content);
+            //let b = CryptoJS.AES.decrypt(a, key).toString()
+            if (i >= files.length-1) finalizeAndSendMessage();   
         }
-        reader.readAsArrayBuffer(f);        
+        reader.readAsArrayBuffer(f);             
     }
+    if (!files.length) finalizeAndSendMessage();
 
-    if (key && key != '')
+    function finalizeAndSendMessage()
     {
-        cipherNick = CryptoJS.AES.encrypt(cipherNick, key);
-        cipherMessage = CryptoJS.AES.encrypt(cipherMessage, key);
+        if (key && key != '')
+        {
+            cipherNick = CryptoJS.AES.encrypt(cipherNick, key);
+            cipherMessage = CryptoJS.AES.encrypt(cipherMessage, key);
 
-        cipherNick = cipherNick.toString();
-        cipherMessage = cipherMessage.toString();
-        encrypted = true;
+            cipherNick = cipherNick.toString();
+            cipherMessage = cipherMessage.toString();
+            encrypted = true;
+        }
+        let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encrypted: encrypted, roomId: roomId, attachmentList: fileContent };
+        app.clearReplyList();
+
+        localStorage.setItem('savedNick',form.nick.value);
+        let msg = JSON.stringify(data);
+        document.getElementById("message-area").value = '';
+        if (document.getElementById("save-key-checkbox").checked) saveKeys();
+
+        socket.send(msg);
     }
-
-    let data = { type: 'chat-message', nick: cipherNick, message: cipherMessage, replyList: app.getReplyList(), encrypted: encrypted, roomId: roomId };
-    app.clearReplyList();
-
-    localStorage.setItem('savedNick',this.nick.value);
-    let msg = JSON.stringify(data);
-    document.getElementById("message-area").value = '';
-    if (document.getElementById("save-key-checkbox").checked) saveKeys();
-
-    socket.send(msg);
 });
 
 function decryptMessages()
