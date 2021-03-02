@@ -3,6 +3,7 @@ const mysql = require('mysql2/promise');
 const { v4: uuidv4 } = require('uuid');
 const express = require('express');
 const { query } = require('express');
+const fs = require('fs');
 require('console-stamp')(console, 'dd.mm.yyyy HH:MM:ss.l');
 
 const ports = [8080, 8081];
@@ -75,11 +76,14 @@ async function main()
                         sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
                     }
 
+                    let resendAttachmentList = [];
                     if (arr.attachmentList)
-                        arr.attachmentList.forEach(fileContent => {
-                            let bin = new Buffer.from(fileContent,"base64");
+                        arr.attachmentList.forEach(async fileObject => {
+                            let bin = new Buffer.from(fileObject.content,"base64");
                             let serverFileName = uuidv4();
-                            //let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName) VALUES (?,?)",[arr.id, serverFileName]);
+                            fs.writeFileSync(__dirname + "/public/attachments/"+serverFileName,bin);
+                            let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName,type) VALUES (?,?,?)",[arr.id, serverFileName, fileObject.type]);
+                            resendAttachmentList.push(attachmentInsertResult[0].id);
                         })
                     await sqlConnection.query("COMMIT");
 
