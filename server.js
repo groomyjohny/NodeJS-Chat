@@ -59,6 +59,7 @@ async function main()
                 {
                     clients[id].roomId = arr.roomId;
                 }
+
                 else if (arr.type == 'chat-message')
                 {
                     const sqlConnection = await mysql.createConnection(sqlConnectionData);
@@ -73,7 +74,7 @@ async function main()
                     {
                         let replyValuesArr = [];
                         arr.replyList.forEach(el => { replyValuesArr.push([arr.id, el]);});
-                        sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
+                        await sqlConnection.query("INSERT INTO replies (parentId, childId) VALUES ?",[replyValuesArr]);
                     }
 
                     let resendAttachmentList = [];
@@ -83,7 +84,7 @@ async function main()
                             let serverFileName = uuidv4();
                             fs.writeFileSync(__dirname + "/public/attachments/"+serverFileName,bin);
                             let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName,type) VALUES (?,?,?)", [arr.id, serverFileName, fileObject.type]);
-                            resendAttachmentList.push(attachmentInsertResult[0].id);
+                            resendAttachmentList.push(attachmentInsertResult[0].insertId);
                         })
                     await sqlConnection.query("COMMIT");
 
@@ -92,7 +93,23 @@ async function main()
                     arr.datetime = datetimeResult[0][0].datetime;
                     arr.attachments = resendAttachmentList;                    
                     sendToAllInRoom(JSON.stringify(arr), arr.roomId);
-                }        
+                }     
+                
+                else if (arr.type == "get-attachment-info")
+                {
+                    const sqlConnection = await mysql.createConnection(sqlConnectionData);
+                    if (!arr.ids) return;
+                    let result = [];
+                    for (attachId of arr.ids)
+                    {
+                        const query = "SELECT id, type, fileName, encrypted FROM attachments WHERE id = ?";
+                        let selectResult = await sqlConnection.query(query, [attachId]);
+                        result.push(selectResult[0][0]);
+                    }
+                    sqlConnection.end();
+                    let response = {type: "attachment-info", info: result};
+                    ws.send(JSON.stringify(response));
+                }
 
                 else if (arr.type == "get-messages")
                 {

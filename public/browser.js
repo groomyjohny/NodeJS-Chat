@@ -100,6 +100,7 @@ socket.onmessage = function (event) {
 
     if (data.type == 'chat-message') handleMessage(data);
     else if (data.type == 'no-more-messages') noMoreMessages = true;
+    else if (data.type == 'attachment-info') handleAttachmentInfo(data);
     else console.log("Incorrect message, parsed: ",data);
 };
 
@@ -122,8 +123,20 @@ function handleMessage(data)
         oldMessageUpperBound = oldMessageUpperBound ? Math.min(oldMessageUpperBound,data.id) : data.id;
     let key = document.forms.publish.key.value;
     if (data.encrypted && key && key != '') app.decryptMessage(data.id, key);
+    if (data.attachments && data.attachments.length) sendGetAttachmentsRequest(data.attachments);
 }
 
+let attachments = {}
+function handleAttachmentInfo(data)
+{
+    data.info.forEach(el => attachments[el.id] = el );
+}
+
+function sendGetAttachmentsRequest(attachments)
+{
+    let request = {type: "get-attachment-info", ids: attachments};
+    socket.send(JSON.stringify(request));
+}
 function sendGetOlderMessagesRequest()
 {
     let data = {
