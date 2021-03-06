@@ -33,7 +33,7 @@ CREATE TABLE `messages` (
   `nick` mediumtext DEFAULT NULL,
   `message` mediumtext DEFAULT NULL,
   `encrypted` tinyint(1) DEFAULT 0,
-  `roomId` varchar(64) DEFAULT NULL
+  `roomId` varchar(64) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

@@ -12,7 +12,7 @@
 <body>
     <!-- форма для отправки сообщений -->
     <form name="publish">
-        <input type="hidden" name="roomId" value="{{roomId}}">
+        <input type="hidden" name="roomId" value="{{#if roomId}}{{roomId}}{{else}}0{{/if}}">
         <div>Ник:</div>
         <textarea name="nick" id="nick-area" required></textarea>
 

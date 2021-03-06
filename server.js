@@ -118,33 +118,13 @@ async function main()
                 else if (arr.type == "get-messages")
                 {
                     const sqlConnection = await mysql.createConnection(sqlConnectionData);
-                    let queryBase = 'SELECT id, datetime, nick, message, encrypted FROM messages WHERE roomId';
-
-                    let query = queryBase;
-                    let queryParams = [];
-
-                    if (clients[id].roomId)
-                    {
-                        queryParams.push(clients[id].roomId);
-                        query += "=? ";
-                    }
-                    else query += " IS NULL ";
-        
-                    if (arr.range) //get messages with id in range, limit is optional
-                    {
-                        query += "AND id BETWEEN ? AND ? ORDER BY id DESC ";
-                        queryParams.push(arr.range[0] ? arr.range[0] : 0);
-                        queryParams.push(arr.range[1] ? arr.range[1] : 18446744073709551615n);
-
-                        if (arr.limit)
-                        {
-                            query += " LIMIT ? ";
-                            queryParams.push(arr.limit);
-                        }
-                    }
-                    else query += "ORDER BY id DESC";
-                    
-                    let selectResults = await sqlConnection.query(query,queryParams);
+                    let query = 'SELECT id, datetime, nick, message, encrypted FROM messages WHERE roomId=? AND id BETWEEN ? AND ? ORDER BY id DESC'; 
+                    let clientRoomId = clients[id].roomId || '0';                    
+                    let idLow = arr.range[0] || 0;
+                    let idHigh = arr.range[1] || 18446744073709551615n
+                    if (arr.limit) query += ' LIMIT ?'; //if you use LIMIT 18446744073709551615, MySQL spits out errors
+                                        
+                    let selectResults = await sqlConnection.query(query,[clientRoomId, idLow, idHigh, arr.limit]); //limit param is ignored if query doesn't have LIMIT ?
                     if (selectResults[0].length == 0) ws.send(JSON.stringify({type: 'no-more-messages'}));
                     selectResults[0].forEach(async el =>
                     {
