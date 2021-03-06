@@ -129,7 +129,13 @@ function handleMessage(data)
 let attachments = {}
 function handleAttachmentInfo(data)
 {
-    data.info.forEach(el => attachments[el.id] = el );
+    data.info.forEach(el => {
+        let attachmentsPath = '/public/attachments/';
+        attachments[el.id] = el;
+        fetch(attachmentsPath+el.fileName).then( (response) => {
+            print(response);
+        });
+    });
 }
 
 function sendGetAttachmentsRequest(attachments)
