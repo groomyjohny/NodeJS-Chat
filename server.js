@@ -82,7 +82,7 @@ async function main()
                         for (fileObject of arr.attachmentList)
                         {
                             let bin = new Buffer.from(fileObject.content,"base64");
-                            let serverFileName = uuidv4();
+                            let serverFileName = uuidv4().split('-').join(''); //uuid without hyphens
                             fs.writeFileSync(__dirname + "/public/attachments/"+serverFileName,bin);
                             let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName,type) VALUES (?,?,?)", [arr.id, serverFileName, fileObject.type]);
                             resendAttachmentList.push(attachmentInsertResult[0].insertId);
