@@ -79,6 +79,7 @@ async function main()
 
                     let resendAttachmentList = [];
                     if (arr.attachmentList)
+                    {
                         for (fileObject of arr.attachmentList)
                         {
                             let bin = new Buffer.from(fileObject.content,"base64");
@@ -87,6 +88,8 @@ async function main()
                             let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName,type) VALUES (?,?,?)", [arr.id, serverFileName, fileObject.type]);
                             resendAttachmentList.push(attachmentInsertResult[0].insertId);
                         }
+                        delete arr.attachmentList;
+                    }
                     await sqlConnection.query("COMMIT");
 
                     let datetimeResult = await sqlConnection.query("SELECT datetime FROM messages WHERE id=?",[arr.id]);
