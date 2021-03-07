@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Фев 23 2021 г., 13:09
+-- Время создания: Мар 07 2021 г., 05:04
 -- Версия сервера: 10.4.17-MariaDB
 -- Версия PHP: 8.0.2
 
@@ -20,6 +20,20 @@ SET time_zone = "+00:00";
 --
 -- База данных: `chat_prod`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `attachments`
+--
+
+CREATE TABLE `attachments` (
+  `id` bigint(20) NOT NULL,
+  `msgId` bigint(20) DEFAULT NULL,
+  `type` varchar(64) CHARACTER SET utf8 DEFAULT NULL,
+  `fileName` varchar(64) CHARACTER SET utf8 DEFAULT NULL,
+  `encrypted` tinyint(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -53,10 +67,17 @@ CREATE TABLE `replies` (
 --
 
 --
+-- Индексы таблицы `attachments`
+--
+ALTER TABLE `attachments`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Индексы таблицы `messages`
 --
 ALTER TABLE `messages`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idxRoomId` (`roomId`) USING BTREE;
 
 --
 -- Индексы таблицы `replies`
@@ -69,6 +90,12 @@ ALTER TABLE `replies`
 --
 -- AUTO_INCREMENT для сохранённых таблиц
 --
+
+--
+-- AUTO_INCREMENT для таблицы `attachments`
+--
+ALTER TABLE `attachments`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT для таблицы `messages`
