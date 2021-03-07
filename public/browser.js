@@ -38,10 +38,13 @@ document.forms.publish.addEventListener("submit", function (event) {
         let f = files[i];
         let reader = new FileReader(f);
         reader.onload = (ev) => {
-            console.log(reader.result);
-            if (key) content = CryptoJS.AES.encrypt(arrayBufferToWordArray(reader.result), key).toString();
-            fileContent.push({type: f.type, content: content});
-            //let b = CryptoJS.AES.decrypt(a, key).toString()
+            let isEncrypted = false;
+            if (key) 
+            {
+                content = CryptoJS.AES.encrypt(arrayBufferToWordArray(reader.result), key).toString();
+                isEncrypted = true;
+            }
+            fileContent.push({type: f.type, content: content, encrypted: isEncrypted});
             if (i >= files.length-1) finalizeAndSendMessage(); //if this is the last file, then finalize and send
         }
         reader.readAsArrayBuffer(f);             
@@ -127,13 +130,44 @@ function handleMessage(data)
 }
 
 let attachments = {}
+
+function i32array_to_u8array(arr)
+{
+    let interm = [];
+    for (el of arr)
+    {       
+        interm.push((el & 0xFF000000) >> 24);
+        interm.push((el & 0x00FF0000) >> 16);
+        interm.push((el & 0x0000FF00) >> 8);
+        interm.push(el & 0x000000FF);
+    }
+    return new Uint8Array(interm);
+}
 function handleAttachmentInfo(data)
 {
     data.info.forEach(el => {
         let attachmentsPath = '/public/attachments/';
-        attachments[el.id] = el;
-        fetch(attachmentsPath+el.fileName).then( (response) => {
-            print(response);
+        app.messages[el.msgId].attachments = app.messages[el.msgId].attachments || [];
+        app.messages[el.msgId].attachments.push(el);
+        fetch(attachmentsPath+el.fileName).then( (response) => { return response.arrayBuffer() }).then( (buffer) => {
+            let content;
+            if (el.encrypted)
+            {
+                let key = document.forms.publish.key.value;
+                let wa = arrayBufferToWordArray(buffer);
+                let str = wa.toString(CryptoJS.enc.Base64);
+                let decrypted = CryptoJS.AES.decrypt(str, key);
+                //content = new Uint8Array.from(decrypted.words);
+                content = i32array_to_u8array(decrypted.words);             
+            }
+            else 
+                content = new Uint8Array(buffer);
+
+            //let arrayBufferView = new Uint8Array(content);
+            
+            let blob = new Blob( [ content ], { type: el.type } );
+            el.blobURL = window.URL.createObjectURL(blob);
+            app.redrawMessage(el.msgId);
         });
     });
 }

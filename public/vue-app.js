@@ -96,8 +96,19 @@ const Chat = {
                 }
             }
 
-            s += `<div class="message-text">${messageText}</div>
-            <a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
+            s += `<div class="message-text">${messageText}</div>`;
+            if (this.messages[msg.object.id].attachments)
+            {
+                s += '<p>Вложения:<p>';
+                for (fileObject of this.messages[msg.object.id].attachments)
+                {
+                    //let fileObject = this.messages[msg.object.id].attachments[fileObjectId];
+                    let t = fileObject.type.split('/');
+                    let bigType = t[0];
+                    if (bigType == 'image') s += `<img src="${fileObject.blobURL}"><p>`; 
+                }
+            }
+            s += `<a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
 
             let decryptStatusIcon = "/public/img/";            
             let decryptStatusCaption;

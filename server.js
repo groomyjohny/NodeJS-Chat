@@ -85,7 +85,7 @@ async function main()
                             let bin = new Buffer.from(fileObject.content,"base64");
                             let serverFileName = uuidv4().split('-').join(''); //uuid without hyphens
                             fs.writeFileSync(__dirname + "/public/attachments/"+serverFileName,bin);
-                            let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName,type) VALUES (?,?,?)", [arr.id, serverFileName, fileObject.type]);
+                            let attachmentInsertResult = await sqlConnection.query("INSERT INTO attachments (msgId,fileName,type,encrypted) VALUES (?,?,?,?)", [arr.id, serverFileName, fileObject.type, fileObject.encrypted]);
                             resendAttachmentList.push(attachmentInsertResult[0].insertId);
                         }
                         delete arr.attachmentList;
@@ -106,7 +106,7 @@ async function main()
                     let result = [];
                     for (attachId of arr.ids)
                     {
-                        const query = "SELECT id, type, fileName, encrypted FROM attachments WHERE id = ?";
+                        const query = "SELECT id, type, fileName, encrypted, msgId FROM attachments WHERE id = ?";
                         let selectResult = await sqlConnection.query(query, [attachId]);
                         result.push(selectResult[0][0]);
                     }
