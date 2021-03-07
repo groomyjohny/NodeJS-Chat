@@ -126,16 +126,25 @@ async function main()
                                         
                     let selectResults = await sqlConnection.query(query,[clientRoomId, idLow, idHigh, arr.limit]); //limit param is ignored if query doesn't have LIMIT ?
                     if (selectResults[0].length == 0) ws.send(JSON.stringify({type: 'no-more-messages'}));
-                    selectResults[0].forEach(async el =>
+                    for (el of selectResults[0])
                     {
                         let data = el;
                         data.type = 'chat-message';
                         data.isOld = arr.range && (!arr.range[0] || !arr.range[1] || (arr.range[1]-arr.range[0] > 0));
+
                         let replyListSelectResults = await sqlConnection.query("SELECT childId FROM replies WHERE parentId = ?",[el.id]);
                         data.replyList = [];
                         replyListSelectResults[0].forEach(el => { data.replyList.push(el.childId) });
+
+                        try {
+                        let attachmentSearchResult = await sqlConnection.query("SELECT id, type, fileName, encrypted, msgId FROM attachments WHERE msgId = ?",[el.id]);
+                        data.attachments = [];
+                        attachmentSearchResult[0].forEach(el => { data.attachments.push(el) });
+                        }
+                        catch (err) {console.log(err)};
+
                         ws.send(JSON.stringify(data));
-                    });
+                    }
                     sqlConnection.end();
                 }
             }

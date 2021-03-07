@@ -157,7 +157,6 @@ function handleAttachmentInfo(data)
                 let wa = arrayBufferToWordArray(buffer);
                 let str = wa.toString(CryptoJS.enc.Base64);
                 let decrypted = CryptoJS.AES.decrypt(str, key);
-                //content = new Uint8Array.from(decrypted.words);
                 content = i32array_to_u8array(decrypted.words);             
             }
             else 
@@ -174,7 +173,9 @@ function handleAttachmentInfo(data)
 
 function sendGetAttachmentsRequest(attachments)
 {
-    let request = {type: "get-attachment-info", ids: attachments};
+    let ids = [];
+    for (el of attachments) ids.push(el.id);
+    let request = {type: "get-attachment-info", ids: ids};
     socket.send(JSON.stringify(request));
 }
 function sendGetOlderMessagesRequest()
