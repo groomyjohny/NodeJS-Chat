@@ -161,8 +161,6 @@ function handleAttachmentInfo(data)
             }
             else 
                 content = new Uint8Array(buffer);
-
-            //let arrayBufferView = new Uint8Array(content);
             
             let blob = new Blob( [ content ], { type: el.type } );
             el.blobURL = window.URL.createObjectURL(blob);
