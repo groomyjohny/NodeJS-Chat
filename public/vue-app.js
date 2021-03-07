@@ -105,7 +105,7 @@ const Chat = {
                     //let fileObject = this.messages[msg.object.id].attachments[fileObjectId];
                     let t = fileObject.type.split('/');
                     let bigType = t[0];
-                    if (bigType == 'image') s += `<img src="${fileObject.blobURL}"><p>`; 
+                    if (bigType == 'image') s += `<img class="attached-image-preview" src="${fileObject.blobURL}">`; 
                 }
             }
             s += `<a class="message-reply-link" onclick="app.addToReplyList(${msg.object.id})">Ответить</a>`;
